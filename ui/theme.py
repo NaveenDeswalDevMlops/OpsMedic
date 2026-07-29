@@ -439,7 +439,7 @@ def chips_anchor() -> None:
     st.markdown('<span id="opm-chips-anchor"></span>', unsafe_allow_html=True)
 
 
-def profile_card(name: str = "Vasam", role: str = "Admin") -> None:
+def profile_card(name: str = "Naveen", role: str = "Admin") -> None:
     """Sidebar profile card with the reference avatar."""
     avatar = _asset_b64("boy.png")
     av = (f'<img src="{avatar}" style="width:46px;border-radius:50%"/>' if avatar
