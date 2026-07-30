@@ -47,7 +47,7 @@ python scripts/build_index.py         # FAISS index (~5 min CPU)
 python finetune/train.py --max-rows 8000 --epochs 3 --balanced   # ~2.5h CPU
 python finetune/compare.py            # base vs fine-tuned evidence
 
-python -m pytest tests -v             # 97 offline tests, 12 files
+python -m pytest tests -v             # 100 offline tests, 12 files
 python scripts/smoke_test.py          # all 6 sub-tasks end-to-end
 streamlit run app.py                  # chat + composer, plus /monitor pages
 ```
@@ -132,23 +132,43 @@ models/                 one wrapper per sub-task (uniform run() -> {output, metr
 llmops/                 metrics · cache · conversations · attachments · insights · system stats
 finetune/               data · train · evaluate · compare (+ artifacts/)
 scripts/                prepare_dataset · build_index · generate_tickets · smoke_test
-tests/                  97 offline tests across 12 files (pytest or plain python)
+tests/                  100 offline tests across 12 files (pytest or plain python)
 data/                   raw/ · tickets.csv · sops/ · index/ · metrics + cache + conversations DBs
 ```
 
-## LLMOps metrics (persisted + dashboarded)
+## LLMOps metrics
 
-latency p50/p95 · tokens in/out · est. cost/request · error rate ·
-cache-hit rate · throughput · user 👍/👎 feedback · model-version stamps ·
-prompt-version stamps. Practices: prompt versioning (writing styles),
-response caching (TTL, keyed on the full payload incl. style), seeded and
-reproducible training, graceful degradation, config-driven model registry.
+**Captured in real time** — one SQLite row written synchronously as each
+sub-task call completes, so the dashboards reflect the run that just
+happened with no batch job in between:
+
+latency (wall-clock, per call) · **time-to-first-token** and
+**tokens/sec** for streamed generation · tokens in/out (exact from the
+Groq `usage` field, estimated only for local models) · est. cost/request
+from a per-model price table · status + error text → error rate ·
+cache-hit flag → cache-hit rate · throughput (requests/min, derived) ·
+user 👍/👎 feedback · model-version and prompt-version stamps.
+
+Aggregations (`summary`, `summary_by_subtask`) compute p50/p95 on read,
+so any window is available without pre-aggregation.
+
+**Not real time, by design** — fine-tuning metrics are offline artifacts,
+since training is a batch job run once: `training_log.json` (per-epoch
+loss, accuracy, macro-F1) and `compare.json` (base vs fine-tuned, per
+class) are written by `finetune/train.py` and `finetune/compare.py`, then
+*read* live by `pages/2_Finetune_Comparison.py`. System stats
+(CPU/RAM/disk in `pages/3_Monitor.py`) are sampled point-in-time on page
+load and not persisted, so there is no historical resource curve.
+
+Practices: prompt versioning (writing styles), response caching (TTL,
+keyed on the full payload incl. style), seeded and reproducible training,
+graceful degradation, config-driven model registry.
 
 ## Tests
 
 ```bash
-python -m pytest tests -v      # all 12 files, 97 tests
-python -m pytest tests -q      # compact "97 passed"
+python -m pytest tests -v      # all 12 files, 100 tests
+python -m pytest tests -q      # compact "100 passed"
 python tests/test_llmops.py    # any single file also runs standalone
 ```
 
@@ -165,7 +185,7 @@ conversation history, insights, fine-tune data handling, and the UI:
   recording Streamlit stub and asserts the topbar is emitted
 
 `beautifulsoup4` (ships soupsieve) is a test-only pin; that one suite
-skips itself without it, so a short count of 82 instead of 97 means it is
+skips itself without it, so a short count of 85 instead of 100 means it is
 missing, not that something broke.
 
 ## Troubleshooting

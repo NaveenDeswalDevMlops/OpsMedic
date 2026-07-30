@@ -15,6 +15,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
+from llmops.metrics import approx_tokens
 from models.base import BaseSubTask
 from scripts.prepare_dataset import queue_slug
 from src import config
@@ -268,6 +269,7 @@ class ResolutionTask(BaseSubTask):
         start = _time.perf_counter()
         collected: list[str] = []
         tokens_in = tokens_out = 0
+        ttft_ms: float | None = None
         status, error_text = "ok", None
         try:
             with requests.post(
@@ -305,6 +307,11 @@ class ResolutionTask(BaseSubTask):
                     for choice in chunk.get("choices", []):
                         piece = (choice.get("delta") or {}).get("content")
                         if piece:
+                            if ttft_ms is None:
+                                # time-to-first-token: the metric that
+                                # actually describes perceived speed of a
+                                # streamed answer
+                                ttft_ms = (_time.perf_counter() - start) * 1000.0
                             collected.append(piece)
                             yield piece
         except Exception as exc:  # noqa: BLE001
@@ -312,9 +319,13 @@ class ResolutionTask(BaseSubTask):
             yield f"\n\n_(streaming error: {error_text})_"
         finally:
             full = "".join(collected)
-            latency_ms = (_time.perf_counter() - start) * 1000.0  # noqa: F841
-            # write exactly one metrics row for the whole streamed call
-            with self.metrics.track(self.name, self.model_name) as trk:
+            latency_ms = (_time.perf_counter() - start) * 1000.0
+            # Write exactly one metrics row for the whole streamed call.
+            # latency_ms MUST be passed in: this block runs after the
+            # stream is exhausted, so letting track() time itself would
+            # record ~0 ms for a multi-second generation.
+            with self.metrics.track(self.name, self.model_name,
+                                    latency_ms=latency_ms) as trk:
                 if tokens_in or tokens_out:
                     trk.set_tokens(tokens_in=tokens_in, tokens_out=tokens_out)
                 else:
@@ -322,6 +333,15 @@ class ResolutionTask(BaseSubTask):
                 trk.add_extra(streamed=True,
                               prompt_version=prompt_version_for(style),
                               style=style)
+                if ttft_ms is not None:
+                    trk.add_extra(ttft_ms=round(ttft_ms, 2))
+                    if latency_ms > ttft_ms:
+                        # decode speed excludes queueing/prompt-processing
+                        gen_s = (latency_ms - ttft_ms) / 1000.0
+                        out_tok = tokens_out or approx_tokens(full)
+                        if gen_s > 0:
+                            trk.add_extra(
+                                tokens_per_sec=round(out_tok / gen_s, 2))
                 if error_text:
                     trk.add_extra(error=error_text)
             if status == "ok" and full and self.cache is not None and self.cacheable:

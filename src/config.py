@@ -57,6 +57,33 @@ CLASSIFIER_FINETUNED_DIR: str = os.getenv(
 ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-tiny")
 TTS_MODEL: str = os.getenv("TTS_MODEL", "facebook/mms-tts-eng")
 
+# --- TTS delivery / tone (see models/tts_prosody.py) ---
+# Measured on real mms-tts-eng output: 83% of energy below 500 Hz and only
+# 2.7% in the 1.5-4 kHz consonant band, i.e. boomy and mushy rather than
+# harsh. So the chain LIFTS presence and cuts rumble; softening defaults
+# off and is only for a future brighter engine.
+TTS_PRESENCE: float = float(os.getenv("TTS_PRESENCE", "0.30"))
+TTS_RUMBLE_CUT: float = float(os.getenv("TTS_RUMBLE_CUT", "0.6"))
+TTS_SOFTEN: float = float(os.getenv("TTS_SOFTEN", "0.0"))
+TTS_PEAK: float = float(os.getenv("TTS_PEAK", "0.72"))
+TTS_MAX_CHARS: int = int(os.getenv("TTS_MAX_CHARS", "900"))
+# Chunked delivery: synthesize sentence-by-sentence and rejoin with
+# deliberate pauses. Fixes the 34% dead air, but prosody resets per chunk,
+# so the result differs audibly from a single continuous pass. Set 0 to get
+# the single-pass path (raw text -> one synth call -> EQ), which is exactly
+# what the approved tone sample used.
+TTS_CHUNKED: bool = _get_bool("TTS_CHUNKED", True)
+
+# VITS sampling knobs. Defaults are the model's OWN defaults, i.e. no change
+# to synthesis: the approved tone sample was EQ applied on top of
+# default-synthesised audio, so deviating here changes the voice itself.
+# speaking_rate <1 slows delivery; noise_scale_duration is the stochastic
+# duration temperature (rhythm variability). Tune only after A/B-ing.
+TTS_SPEAKING_RATE: float = float(os.getenv("TTS_SPEAKING_RATE", "1.0"))
+TTS_NOISE_SCALE: float = float(os.getenv("TTS_NOISE_SCALE", "0.667"))
+TTS_NOISE_SCALE_DURATION: float = float(
+    os.getenv("TTS_NOISE_SCALE_DURATION", "0.8"))
+
 # --- Data: Customer IT Support ticket dataset (with resolutions) ----
 # Citation: T. Bueck, "Customer Support Tickets", Hugging Face.
 #   https://huggingface.co/datasets/Tobi-Bueck/customer-support-tickets
