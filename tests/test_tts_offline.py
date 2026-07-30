@@ -351,6 +351,82 @@ def test_render_chunks_respects_budget_but_always_renders_one():
     assert audio.size > 0
 
 
+# ------------------------------------------------- backend selection
+def test_backend_is_chosen_from_the_model_name():
+    task = _task()
+    task.model_name = "facebook/mms-tts-eng"
+    assert task.backend == "vits"
+    task.model_name = "hexgrad/Kokoro-82M"
+    assert task.backend == "kokoro"
+    task.model_name = "HEXGRAD/kokoro-82M"          # case-insensitive
+    assert task.backend == "kokoro"
+
+
+def test_kokoro_missing_package_gives_an_actionable_error():
+    """Kokoro is opt-in; the failure must name the fix, not a stack trace."""
+    import sys
+    task = TTSTask(metrics=MetricsLogger(os.path.join(tempfile.mkdtemp(), "m.db")),
+                   cache=None)
+    task.model_name = "hexgrad/Kokoro-82M"
+    saved = sys.modules.pop("kokoro", None)
+    sys.modules["kokoro"] = None                     # force ImportError
+    try:
+        out = task.run("Escalate to level two.")
+        assert out["metrics"]["status"] == "error"
+        err = out["metrics"]["error"]
+        assert "pip install kokoro" in err, err
+        assert "espeak-ng" in err, err
+        assert "mms-tts-eng" in err, err             # names the way back
+    finally:
+        sys.modules.pop("kokoro", None)
+        if saved is not None:
+            sys.modules["kokoro"] = saved
+
+
+def test_kokoro_synthesis_path_accepts_the_generator_shape():
+    """Kokoro yields (graphemes, phonemes, audio); take the audio."""
+    task = _task()
+    task.model_name = "hexgrad/Kokoro-82M"
+    task._kokoro = lambda text, voice=None, speed=None: [
+        ("hello", "h@l0U", _tone(40)),
+        ("world", "w3rld", _tone(40)),
+    ]
+    task._sr = 24000
+    out = task._synth_kokoro("hello world")
+    assert out.dtype == np.float32
+    assert out.size == 2 * _tone(40).size
+
+
+def test_kokoro_empty_output_is_an_actionable_error():
+    task = _task()
+    task.model_name = "hexgrad/Kokoro-82M"
+    task._kokoro = lambda text, voice=None, speed=None: []
+    try:
+        task._synth_kokoro("hello")
+        raise AssertionError("should have raised")
+    except RuntimeError as exc:
+        assert "voice" in str(exc).lower(), exc
+
+
+def test_vits_knobs_are_skipped_for_a_non_vits_backend():
+    task = _task()
+    task.model_name = "hexgrad/Kokoro-82M"
+    task._model = None
+    task._apply_vits_knobs()
+    assert task._knobs == {}
+
+
+def test_output_reports_backend_device_and_voice():
+    _reset()
+    task = _task()
+    task._sr = 16000
+    out = task.run("Check the VPN tunnel.")
+    o = out["output"]
+    assert o["backend"] == "vits"
+    assert o["device"] in ("cpu", "mps", "cuda")
+    assert "voice" in o
+
+
 # ------------------------------------------------------- stdlib test runner
 def _main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]

@@ -46,16 +46,32 @@ RESOLUTION_MODEL: str = os.getenv("RESOLUTION_MODEL", "llama-3.1-8b-instant")
 EMBEDDING_MODEL: str = os.getenv(
     "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
 )
-SUMMARIZER_MODEL: str = os.getenv("SUMMARIZER_MODEL", "sshleifer/distilbart-cnn-12-6")
+SUMMARIZER_MODEL: str = os.getenv("SUMMARIZER_MODEL", "facebook/bart-large-cnn")
+# DeBERTa-v3-base (184M, MIT) beats DistilBERT on short jargon-dense text and
+# is the one model we fine-tune, so it drives the before/after numbers.
+# NOTE: needs `sentencepiece` installed, and is learning-rate sensitive —
+# train at ~2e-5, not the 5e-5 that suited DistilBERT.
 CLASSIFIER_BASE_MODEL: str = os.getenv(
-    "CLASSIFIER_BASE_MODEL", "distilbert-base-uncased"
+    "CLASSIFIER_BASE_MODEL", "microsoft/deberta-v3-base"
 )
 CLASSIFIER_FINETUNED_DIR: str = os.getenv(
-    "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/distilbert-tickets"
+    "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/deberta-tickets"
 )
 # Speech Recognition category
-ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-tiny")
+# whisper-small (244M) is a large WER win over tiny and needs no transformers
+# bump. whisper-large-v3-turbo is better still but wants transformers >= 4.45
+# and will thermal-throttle a fanless MacBook Air on a long demo.
+ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-small")
+# Default stays mms-tts-eng so a fresh clone runs with no extra system
+# packages. Kokoro-82M sounds markedly better (24 kHz, real voice presets)
+# but needs `pip install kokoro` AND the espeak-ng binary, so it is opt-in:
+#     TTS_MODEL=hexgrad/Kokoro-82M
+# models/tts.py picks the backend from this string.
 TTS_MODEL: str = os.getenv("TTS_MODEL", "facebook/mms-tts-eng")
+# Kokoro voice presets: af_*/am_* American female/male, bf_*/bm_* British.
+KOKORO_VOICE: str = os.getenv("KOKORO_VOICE", "bf_emma")
+KOKORO_LANG: str = os.getenv("KOKORO_LANG", "b")   # 'a' American, 'b' British
+KOKORO_SPEED: float = float(os.getenv("KOKORO_SPEED", "1.0"))
 
 # --- TTS delivery / tone (see models/tts_prosody.py) ---
 # Measured on real mms-tts-eng output: 83% of energy below 500 Hz and only
@@ -126,3 +142,35 @@ PRICE_PER_MTOK: dict[str, dict[str, float]] = {
 FINETUNE_MAX_ROWS: int = int(os.getenv("FINETUNE_MAX_ROWS", "2000"))
 FINETUNE_EPOCHS: int = int(os.getenv("FINETUNE_EPOCHS", "2"))
 FINETUNE_SEED: int = int(os.getenv("FINETUNE_SEED", "42"))
+
+
+# --- Compute device -------------------------------------------------
+def resolve_device() -> str:
+    """Return 'cuda', 'mps' or 'cpu' for model placement.
+
+    A function rather than a module constant so importing config stays
+    cheap — torch is only imported when a model is actually loaded.
+
+    Set DEVICE=cpu in .env to force a fallback; on Apple Silicon also set
+    PYTORCH_ENABLE_MPS_FALLBACK=1, because a few ops are still
+    unimplemented on the MPS backend and hard-error without it.
+    """
+    want = os.getenv("DEVICE", "auto").strip().lower()
+    if want and want != "auto":
+        return want
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return "cuda"
+        mps = getattr(torch.backends, "mps", None)
+        if mps is not None and mps.is_available():
+            return "mps"
+    except Exception:  # noqa: BLE001 - never let device probing break startup
+        pass
+    return "cpu"
+
+
+def use_fp16() -> bool:
+    """fp16 is safe on CUDA; on MPS it still produces NaNs in some models."""
+    return resolve_device() == "cuda"

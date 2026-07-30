@@ -48,8 +48,10 @@ def main() -> None:
     parser.add_argument("--max-rows", type=int, default=config.FINETUNE_MAX_ROWS)
     parser.add_argument("--eval-rows", type=int, default=1000)
     parser.add_argument("--epochs", type=int, default=config.FINETUNE_EPOCHS)
-    parser.add_argument("--batch", type=int, default=16)
-    parser.add_argument("--lr", type=float, default=5e-5)
+    parser.add_argument("--batch", type=int, default=32)
+    # 2e-5 suits DeBERTa-v3 (5e-5 was tuned for DistilBERT and makes
+    # DeBERTa-v3 diverge or underperform)
+    parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--seed", type=int, default=config.FINETUNE_SEED)
     parser.add_argument("--balanced", action="store_true",
                         help="median-downsample classes to fight majority bias")
@@ -108,7 +110,13 @@ def main() -> None:
     train_ds = TicketDataset(train_texts, train_ids)
     eval_ds = TicketDataset(test_texts, test_ids)
 
+    device = config.resolve_device()
+    print(f"[train] device={device} fp16={config.use_fp16()} "
+          f"base={config.CLASSIFIER_BASE_MODEL}")
     training_args = TrainingArguments(
+        fp16=config.use_fp16(),          # CUDA only; NaNs on MPS
+        warmup_ratio=0.06,
+        weight_decay=0.01,
         output_dir=os.path.join(paths["artifact_dir"], "checkpoints"),
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch,

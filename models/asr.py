@@ -51,6 +51,7 @@ class ASRTask(BaseSubTask):
                 "automatic-speech-recognition",
                 model=self.model_name,
                 chunk_length_s=30,
+                device=config.resolve_device(),
             )
 
     def _run(self, payload: Any) -> str:

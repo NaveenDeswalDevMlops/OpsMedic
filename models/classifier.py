@@ -126,7 +126,8 @@ class ClassifierTask(BaseSubTask):
             else self._model_path
         )
         self._pipe = pipeline(
-            "text-classification", model=model, tokenizer=tokenizer
+            "text-classification", model=model, tokenizer=tokenizer,
+            device=config.resolve_device(),
         )
 
     def _run(self, payload: Any) -> dict[str, Any]:

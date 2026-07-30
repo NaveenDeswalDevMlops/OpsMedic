@@ -57,17 +57,59 @@ class TTSTask(BaseSubTask):
         self.model_name = config.TTS_MODEL
         self._model = None
         self._tokenizer = None
+        self._kokoro = None
         self._knobs: dict[str, float] = {}
+        self._sr: int | None = None
+
+    # -- backend -------------------------------------------------------
+    @property
+    def backend(self) -> str:
+        """'kokoro' or 'vits', chosen from the model name.
+
+        Kokoro-82M is a different architecture (not a VitsModel) with its
+        own pipeline object and voice presets, so it needs a separate
+        loader rather than a config tweak.
+        """
+        return "kokoro" if "kokoro" in self.model_name.lower() else "vits"
 
     # -- model ---------------------------------------------------------
     def _ensure_loaded(self) -> None:
-        if self._model is not None:
+        if self._model is not None or self._kokoro is not None:
             return
+        if self.backend == "kokoro":
+            self._load_kokoro()
+        else:
+            self._load_vits()
+
+    def _load_vits(self) -> None:
         from transformers import AutoTokenizer, VitsModel  # lazy
 
         self._model = VitsModel.from_pretrained(self.model_name)
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        device = config.resolve_device()
+        try:
+            self._model = self._model.to(device)
+        except Exception:  # noqa: BLE001 - fall back rather than fail the demo
+            device = "cpu"
+        self._device = device
+        self._sr = int(self._model.config.sampling_rate)
         self._apply_vits_knobs()
+
+    def _load_kokoro(self) -> None:
+        """Load Kokoro-82M. Requires `pip install kokoro` and espeak-ng."""
+        try:
+            from kokoro import KPipeline  # lazy, optional dependency
+        except ImportError as exc:  # noqa: BLE001
+            raise RuntimeError(
+                "TTS_MODEL is set to Kokoro but the 'kokoro' package is not "
+                "installed. Run: pip install kokoro   (and install espeak-ng: "
+                "macOS `brew install espeak-ng`, Debian/Ubuntu "
+                "`apt-get install espeak-ng`). Set "
+                "TTS_MODEL=facebook/mms-tts-eng to use the built-in voice."
+            ) from exc
+        self._kokoro = KPipeline(lang_code=config.KOKORO_LANG)
+        self._device = config.resolve_device()
+        self._sr = 24000          # Kokoro outputs 24 kHz
 
     def _apply_vits_knobs(self) -> None:
         """Set VITS sampling knobs, tolerating attribute renames.
@@ -77,6 +119,9 @@ class TTSTask(BaseSubTask):
         between versions, so each is set only if present and what
         actually applied is reported in the output for the record.
         """
+        if self.backend != "vits" or self._model is None:
+            self._knobs = {}
+            return
         wanted = {
             "speaking_rate": config.TTS_SPEAKING_RATE,
             "noise_scale": config.TTS_NOISE_SCALE,
@@ -96,12 +141,46 @@ class TTSTask(BaseSubTask):
 
     def _synth(self, text: str) -> np.ndarray:
         """Synthesize one chunk to a float32 mono waveform."""
+        if self.backend == "kokoro":
+            return self._synth_kokoro(text)
+        return self._synth_vits(text)
+
+    def _synth_vits(self, text: str) -> np.ndarray:
         import torch  # lazy
 
         inputs = self._tokenizer(text, return_tensors="pt")
+        device = getattr(self, "_device", "cpu")
+        if device != "cpu":
+            inputs = {k: v.to(device) for k, v in inputs.items()}
         with torch.no_grad():
             waveform = self._model(**inputs).waveform
-        return waveform.squeeze().cpu().numpy().astype(np.float32)
+        return waveform.squeeze().detach().cpu().numpy().astype(np.float32)
+
+    def _synth_kokoro(self, text: str) -> np.ndarray:
+        """Kokoro yields (graphemes, phonemes, audio) per segment.
+
+        Tolerant of the exact yield shape: anything array-like in the
+        tuple is treated as the waveform, so a minor API change in the
+        kokoro package degrades to a clear error rather than silence.
+        """
+        pieces: list[np.ndarray] = []
+        for item in self._kokoro(text, voice=config.KOKORO_VOICE,
+                                speed=config.KOKORO_SPEED):
+            audio = item[-1] if isinstance(item, (tuple, list)) else item
+            if hasattr(audio, "detach"):          # torch tensor
+                audio = audio.detach().cpu().numpy()
+            arr = np.asarray(audio, dtype=np.float32).squeeze()
+            if arr.ndim > 1:
+                arr = arr.mean(axis=tuple(range(1, arr.ndim)))
+            if arr.size:
+                pieces.append(arr)
+        if not pieces:
+            raise RuntimeError(
+                f"Kokoro returned no audio for voice {config.KOKORO_VOICE!r}. "
+                "Check the voice id is valid for KOKORO_LANG="
+                f"{config.KOKORO_LANG!r}."
+            )
+        return np.concatenate(pieces).astype(np.float32)
 
     # -- sub-task ------------------------------------------------------
     def _run(self, payload: Any) -> dict[str, Any]:
@@ -140,7 +219,7 @@ class TTSTask(BaseSubTask):
                 raise ValueError("text contained no speakable content")
 
         self._ensure_loaded()
-        sr = int(self._model.config.sampling_rate)
+        sr = int(self._sr or 16000)
 
         if chunked:
             audio, rendered, truncated = render_chunks(
@@ -167,6 +246,9 @@ class TTSTask(BaseSubTask):
             "truncated": truncated,
             "tone": {"presence": presence, "rumble": rumble,
                      "soften": soften_amount, "peak": peak},
+            "backend": self.backend,
+            "device": getattr(self, "_device", "cpu"),
+            "voice": config.KOKORO_VOICE if self.backend == "kokoro" else "default",
             "vits_knobs": dict(self._knobs),
             "presence_ratio": round(presence_ratio(audio, sr), 4),
         }

@@ -1,0 +1,68 @@
+# .env.example
+# Copy to .env and fill in. Only GROQ_API_KEY is required for the
+# resolution sub-task; everything else has working defaults.
+# Get a free key at https://console.groq.com
+
+GROQ_API_KEY=
+
+# --- Branding (working title; rename here anytime) ---
+PRODUCT_NAME=OpsMedic
+PRODUCT_TAGLINE=GenAI Incident Copilot — diagnose, resolve, learn
+ORG_NAME=Genpact
+
+# --- Models (free/local defaults; override only if needed) ---
+# RESOLUTION_MODEL=llama-3.1-8b-instant
+# EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+# SUMMARIZER_MODEL=sshleifer/distilbart-cnn-12-6
+# CLASSIFIER_BASE_MODEL=distilbert-base-uncased
+# ASR_MODEL=openai/whisper-tiny
+# TTS_MODEL=facebook/mms-tts-eng
+# Better voice (24 kHz, selectable accents). Needs: pip install kokoro
+# plus the espeak-ng binary (brew install espeak-ng on macOS).
+# TTS_MODEL=hexgrad/Kokoro-82M
+# KOKORO_VOICE=bf_emma         # bf_/bm_ British female/male, af_/am_ American
+# KOKORO_LANG=b                # 'a' American English, 'b' British English
+# KOKORO_SPEED=1.0
+# IMPORTANT when switching to Kokoro: the EQ below was measured against
+# mms-tts-eng's specific defect (83% of energy under 500 Hz). Kokoro does not
+# have it, so turn the correction OFF or the result is over-bright:
+#   TTS_PRESENCE=0
+#   TTS_RUMBLE_CUT=0
+
+# --- TTS delivery / tone (models/tts_prosody.py) ---
+# Measured: output is boomy and consonant-poor, NOT harsh — so presence is
+# lifted and softening stays off. Raise TTS_SOFTEN only for a brighter engine.
+# TTS_PRESENCE=0.30            # 1.5-4 kHz consonant lift (0.25-0.40 useful)
+# TTS_RUMBLE_CUT=0.6           # attenuate sub-110 Hz boom
+# TTS_SOFTEN=0.0               # high-frequency roll-off; 0 = off
+# TTS_PEAK=0.72                # normalisation target (raw MMS peaks ~0.86)
+# TTS_MAX_CHARS=900            # spoken-character budget per clip
+# TTS_CHUNKED=1                # 1 = sentence-by-sentence (fixes dead air);
+#                              # 0 = ONE continuous pass, i.e. exactly the
+#                              #     pipeline of the approved tone sample
+# --- VITS knobs: defaults below are the MODEL's own defaults (no change to
+# --- synthesis). Changing them changes the voice, not just the tone.
+# TTS_SPEAKING_RATE=1.0        # <1 slower/calmer
+# TTS_NOISE_SCALE=0.667
+# TTS_NOISE_SCALE_DURATION=0.8 # rhythm variability (the anti-robot knob)
+
+# --- Retrieval ---
+# TOP_K=3
+# SIMILARITY_THRESHOLD=0.35
+
+# --- LLMOps ---
+# METRICS_DB_PATH=./data/llmops_metrics.db
+# CACHE_DB_PATH=./data/llmops_cache.db
+# CACHE_TTL_SECONDS=3600
+# CACHE_ENABLED=1
+
+# --- Compute device -------------------------------------------------
+# auto = cuda > mps > cpu. Force with cpu/mps/cuda.
+# DEVICE=auto
+# REQUIRED on Apple Silicon: some ops are unimplemented on MPS and hard-error.
+# PYTORCH_ENABLE_MPS_FALLBACK=1
+
+# --- Dataset ---
+# Tobi-Bueck/customer-support-tickets (DOI 10.57967/hf/6184, CC-BY-NC-4.0).
+# Place the CSVs in data/raw/ and run scripts/prepare_dataset.py; see README.
+# KB_ROWS=0            # 0 = index every prepared ticket; e.g. 5000 for quick runs
