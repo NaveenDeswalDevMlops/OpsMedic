@@ -58,10 +58,11 @@ CLASSIFIER_FINETUNED_DIR: str = os.getenv(
     "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/deberta-tickets"
 )
 # Speech Recognition category
-# whisper-small (244M) is a large WER win over tiny and needs no transformers
-# bump. whisper-large-v3-turbo is better still but wants transformers >= 4.45
-# and will thermal-throttle a fanless MacBook Air on a long demo.
-ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-small")
+# whisper-medium (769M) — chosen for accuracy now that a GPU is available.
+# Note it is ~3x whisper-small: on a FANLESS MacBook Air expect noticeably
+# slower transcription and thermal throttling over a long demo session. Drop
+# back for a live demo with:  ASR_MODEL=openai/whisper-small
+ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-medium")
 # Default stays mms-tts-eng so a fresh clone runs with no extra system
 # packages. Kokoro-82M sounds markedly better (24 kHz, real voice presets)
 # but needs `pip install kokoro` AND the espeak-ng binary, so it is opt-in:
@@ -139,8 +140,12 @@ PRICE_PER_MTOK: dict[str, dict[str, float]] = {
 
 # --- Fine-tuning -----------------------------------------------------
 # Public dataset id is pinned inside finetune/data.py with its citation.
-FINETUNE_MAX_ROWS: int = int(os.getenv("FINETUNE_MAX_ROWS", "2000"))
-FINETUNE_EPOCHS: int = int(os.getenv("FINETUNE_EPOCHS", "2"))
+# 0 = full prepared dataset. These defaults apply when train.py is invoked
+# WITHOUT --max-rows / --epochs. They were 2000/2 while training was
+# CPU-bound; with a GPU, capping the data is the thing most likely to make
+# the fine-tune look worse than it should.
+FINETUNE_MAX_ROWS: int = int(os.getenv("FINETUNE_MAX_ROWS", "0"))
+FINETUNE_EPOCHS: int = int(os.getenv("FINETUNE_EPOCHS", "3"))
 FINETUNE_SEED: int = int(os.getenv("FINETUNE_SEED", "42"))
 
 
@@ -174,3 +179,35 @@ def resolve_device() -> str:
 def use_fp16() -> bool:
     """fp16 is safe on CUDA; on MPS it still produces NaNs in some models."""
     return resolve_device() == "cuda"
+
+
+#: Checkpoints that reliably produce NaN losses under fp16 training. The
+#: DeBERTa family is the well-known case: its disentangled attention
+#: overflows in half precision, and the failure looks like loss=nan a few
+#: hundred steps in rather than an error, so it is easy to waste GPU hours.
+FP16_UNSTABLE: tuple[str, ...] = (
+    "deberta-v3-large",
+    "deberta-v2-xlarge",
+    "deberta-v2-xxlarge",
+)
+
+
+def train_fp16(model_name: str | None = None) -> bool:
+    """Whether to enable fp16 for a TRAINING run.
+
+    Requires CUDA and a checkpoint not on the unstable list. Override
+    either way with TRAIN_FP16=1 / TRAIN_FP16=0 in .env.
+    """
+    override = os.getenv("TRAIN_FP16")
+    if override is not None and override.strip() != "":
+        return override.strip().lower() in ("1", "true", "yes", "on")
+    if not use_fp16():
+        return False
+    name = (model_name or CLASSIFIER_BASE_MODEL).lower()
+    return not any(bad in name for bad in FP16_UNSTABLE)
+
+
+def is_large_encoder(model_name: str | None = None) -> bool:
+    """True for *-large / *-xlarge checkpoints, which need gentler settings."""
+    name = (model_name or CLASSIFIER_BASE_MODEL).lower()
+    return any(tag in name for tag in ("large", "xlarge", "xxlarge"))

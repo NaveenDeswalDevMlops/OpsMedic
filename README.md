@@ -119,7 +119,7 @@ the anti-hallucination contract — enforced by a test.
 | Resolution | llama-3.1-8b-instant (Groq API, free tier) | fluent grounded generation, near-zero cost |
 | Summarize | facebook/bart-large-cnn | full BART beats the distilled variant on technical prose; drop-in |
 | Classify | **microsoft/deberta-v3-base → fine-tuned** | strongest base-size encoder for short jargon-dense text; MIT |
-| ASR | openai/whisper-small | large WER win over tiny; no transformers bump needed |
+| ASR | openai/whisper-medium | accuracy on accented/noisy input; slower on a fanless Air — override to whisper-small for a latency-critical demo |
 | TTS | facebook/mms-tts-eng (default) · **hexgrad/Kokoro-82M** (opt-in) | mms needs no system packages; Kokoro adds 24 kHz + voice presets |
 
 ## Speech delivery (why the audio is shaped, not just generated)
@@ -195,8 +195,19 @@ for training on CUDA only — on MPS it still produces NaNs in some models.
 than the CPU-sized 8k subset:
 
 ```bash
-make train-gpu     # --max-rows 0 --epochs 3 --batch 32 --lr 2e-5 --balanced
+make train-gpu     # full dataset; batch and lr are derived from the base model
 ```
+
+`FT_ROWS` defaults to **0 (the full prepared dataset)**. It was capped at 8,000
+while training was CPU-bound — with a GPU, capping the data is the thing most
+likely to make the fine-tune look worse than it is. On a CPU-only machine
+override it: `make finetune FT_ROWS=8000`.
+
+Batch size, learning rate and gradient accumulation are **not** hard-coded in
+the Makefile: `finetune/train.py` derives them from the chosen base model
+(`-base` → batch 32 / lr 2e-5; `-large` → batch 16 / lr 1e-5 / accum 2, with
+fp16 auto-disabled because DeBERTa-large NaNs in half precision). Hard-coding
+them would silently apply the wrong settings the moment the base model changes.
 
 The learning rate matters: DeBERTa-v3 is LR-sensitive and diverges at the
 `5e-5` that suited DistilBERT, so the default is now `2e-5` with 6% warmup
