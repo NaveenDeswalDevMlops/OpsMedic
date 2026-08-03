@@ -1,0 +1,357 @@
+e set a HF_TOKEN to enable higher rate limits and faster downloads.
+modules.json: 100%|███████████████████| 349/349 [00:00<00:00, 873kB/s]
+config_sentence_transformers.json: 100%|█| 116/116 [00:00<00:00, 355kB
+README.md: 100%|█████████████████| 10.5k/10.5k [00:00<00:00, 17.7MB/s]
+sentence_bert_config.json: 100%|████| 53.0/53.0 [00:00<00:00, 200kB/s]
+config.json: 100%|███████████████████| 612/612 [00:00<00:00, 1.63MB/s]
+model.safetensors: downloading bytes: ████████████| 85.0MB, 4.39MB/s  
+model.safetensors: reconstructing file: 100%|█| 90.9MB / 90.9MB, 7.07M
+Loading weights: 100%|████████████| 103/103 [00:00<00:00, 9965.93it/s]
+tokenizer_config.json: 100%|█████████| 350/350 [00:00<00:00, 2.59MB/s]
+vocab.txt: 100%|███████████████████| 232k/232k [00:00<00:00, 6.36MB/s]
+tokenizer.json: 100%|██████████████| 466k/466k [00:00<00:00, 22.7MB/s]
+special_tokens_map.json: 100%|████████| 112/112 [00:00<00:00, 616kB/s]
+config.json: 100%|███████████████████| 190/190 [00:00<00:00, 1.92MB/s]
+Batches: 100%|██████████████████████| 215/215 [00:47<00:00,  4.54it/s]
+Embedded in 77.6s -> shape (13728, 384)
+Wrote 13728 vectors -> ./data/index/index.faiss
+Wrote metadata          -> ./data/index/meta.csv
+Done. Next: python scripts/smoke_test.py
+python finetune/train.py --max-rows 0 --epochs 3 --balanced
+Balanced classes to median size: 11668 -> 6146 rows
+Train rows: 6146 | Eval rows: 2060 | Classes: 10
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights: 100%|███████████| 198/198 [00:00<00:00, 27885.97it/s]
+[transformers] DebertaV2ForSequenceClassification LOAD REPORT from: microsoft/deberta-v3-base
+Key                                     | Status     | 
+----------------------------------------+------------+-
+mask_predictions.classifier.bias        | UNEXPECTED | 
+lm_predictions.lm_head.dense.bias       | UNEXPECTED | 
+lm_predictions.lm_head.LayerNorm.bias   | UNEXPECTED | 
+mask_predictions.LayerNorm.weight       | UNEXPECTED | 
+mask_predictions.LayerNorm.bias         | UNEXPECTED | 
+lm_predictions.lm_head.dense.weight     | UNEXPECTED | 
+lm_predictions.lm_head.LayerNorm.weight | UNEXPECTED | 
+mask_predictions.dense.bias             | UNEXPECTED | 
+lm_predictions.lm_head.bias             | UNEXPECTED | 
+mask_predictions.classifier.weight      | UNEXPECTED | 
+mask_predictions.dense.weight           | UNEXPECTED | 
+classifier.bias                         | MISSING    | 
+classifier.weight                       | MISSING    | 
+pooler.dense.weight                     | MISSING    | 
+pooler.dense.bias                       | MISSING    | 
+
+Notes:
+- UNEXPECTED:   can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:      those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+[train] device=mps fp16=False batch=16 grad_accum=2 lr=1e-05 effective_batch=32 base=microsoft/deberta-v3-base
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+  0%|                                         | 0/579 [00:00<?, ?it/s]/opt/anaconda3/lib/python3.13/site-packages/torch/utils/data/dataloader.py:775: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, device pinned memory won't be used.
+  super().__init__(loader)
+{'loss': '502.3', 'grad_norm': 'nan', 'learning_rate': '6.857e-06', 'epoch': '0.1299'}
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '9.743e-06', 'epoch': '0.2597'}
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '9.283e-06', 'epoch': '0.3896'}
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '8.824e-06', 'epoch': '0.5195'}                              
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '8.364e-06', 'epoch': '0.6494'}                              
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '7.904e-06', 'epoch': '0.7792'}                              
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '7.445e-06', 'epoch': '0.9091'}                              
+{'eval_loss': 'nan', 'eval_accuracy': '0.09806', 'eval_f1_macro': '0.01786', 'eval_runtime': '284.2', 'eval_samples_per_second': '7.249', 'eval_steps_per_second': '0.229', 'epoch': '1'}                                       
+ 33%|████████████████████████▎                                                | 193/579 [28:47<46:51,  7.28s/it/opt/anaconda3/lib/python3.13/site-packages/torch/utils/data/dataloader.py:775: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, device pinned memory won't be used.
+  super().__init__(loader)
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '6.985e-06', 'epoch': '1.036'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '6.526e-06', 'epoch': '1.166'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '6.066e-06', 'epoch': '1.296'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '5.607e-06', 'epoch': '1.426'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '5.147e-06', 'epoch': '1.556'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '4.688e-06', 'epoch': '1.686'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '4.228e-06', 'epoch': '1.816'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '3.768e-06', 'epoch': '1.945'}                               
+{'eval_loss': 'nan', 'eval_accuracy': '0.09806', 'eval_f1_macro': '0.01786', 'eval_runtime': '336.7', 'eval_samples_per_second': '6.117', 'eval_steps_per_second': '0.193', 'epoch': '2'}                                       
+ 67%|███████████████████████████████████████████████▎                       | 386/579 [1:09:26<37:12, 11.57s/it/opt/anaconda3/lib/python3.13/site-packages/torch/utils/data/dataloader.py:775: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, device pinned memory won't be used.
+  super().__init__(loader)
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '3.309e-06', 'epoch': '2.073'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '2.849e-06', 'epoch': '2.203'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '2.39e-06', 'epoch': '2.332'}                                
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '1.93e-06', 'epoch': '2.462'}                                
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '1.471e-06', 'epoch': '2.592'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '1.011e-06', 'epoch': '2.722'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '5.515e-07', 'epoch': '2.852'}                               
+{'loss': '0', 'grad_norm': 'nan', 'learning_rate': '9.191e-08', 'epoch': '2.982'}                               
+{'eval_loss': 'nan', 'eval_accuracy': '0.09806', 'eval_f1_macro': '0.01786', 'eval_runtime': '189.4', 'eval_samples_per_second': '10.88', 'eval_steps_per_second': '0.343', 'epoch': '3'}                                       
+{'train_runtime': '6195', 'train_samples_per_second': '2.976', 'train_steps_per_second': '0.093', 'train_loss': '21.69', 'epoch': '3'}                                                                                          
+100%|███████████████████████████████████████████████████████████████████████| 579/579 [1:43:15<00:00, 10.70s/it]
+/opt/anaconda3/lib/python3.13/site-packages/torch/utils/data/dataloader.py:775: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, device pinned memory won't be used.
+  super().__init__(loader)
+100%|███████████████████████████████████████████████████████████████████████████| 65/65 [02:17<00:00,  2.11s/it]
+
+Training finished in 105.6 min
+Final eval: {
+  "eval_loss": NaN,
+  "eval_accuracy": 0.09805825242718447,
+  "eval_f1_macro": 0.01786030061892131,
+  "eval_runtime": 140.031,
+  "eval_samples_per_second": 14.711,
+  "eval_steps_per_second": 0.464,
+  "epoch": 3.0
+}
+Writing model shards: 100%|███████████████████████████████████████████████████████| 1/1 [00:00<00:00,  5.98it/s]
+
+Saved fine-tuned model -> ./finetune/artifacts/deberta-tickets
+Next: python finetune/compare.py   (base vs fine-tuned)
+python finetune/compare.py
+Evaluating BASE (untrained head) ...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights: 100%|█████████████████████████████████████████████████████| 198/198 [00:00<00:00, 69600.42it/s]
+[transformers] DebertaV2ForSequenceClassification LOAD REPORT from: microsoft/deberta-v3-base
+Key                                     | Status     | 
+----------------------------------------+------------+-
+mask_predictions.classifier.bias        | UNEXPECTED | 
+lm_predictions.lm_head.LayerNorm.weight | UNEXPECTED | 
+mask_predictions.dense.weight           | UNEXPECTED | 
+lm_predictions.lm_head.dense.weight     | UNEXPECTED | 
+lm_predictions.lm_head.bias             | UNEXPECTED | 
+lm_predictions.lm_head.LayerNorm.bias   | UNEXPECTED | 
+mask_predictions.LayerNorm.weight       | UNEXPECTED | 
+mask_predictions.LayerNorm.bias         | UNEXPECTED | 
+lm_predictions.lm_head.dense.bias       | UNEXPECTED | 
+mask_predictions.classifier.weight      | UNEXPECTED | 
+mask_predictions.dense.bias             | UNEXPECTED | 
+classifier.weight                       | MISSING    | 
+pooler.dense.weight                     | MISSING    | 
+pooler.dense.bias                       | MISSING    | 
+classifier.bias                         | MISSING    | 
+
+Notes:
+- UNEXPECTED:   can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:      those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+
+Evaluating FINE-TUNED ...
+Loading weights: 100%|████████████| 202/202 [00:00<00:00, 7035.44it/s]
+
+================ BASE vs FINE-TUNED ================
+metric             base   fine-tuned      delta
+accuracy         0.1898       0.0981    -0.0917
+f1_macro         0.0319       0.0179    -0.0140
+(held-out rows evaluated: 2060)
+Loading weights: 100%|███████████| 198/198 [00:00<00:00, 30976.21it/s]
+[transformers] DebertaV2ForSequenceClassification LOAD REPORT from: microsoft/deberta-v3-base
+Key                                     | Status     | 
+----------------------------------------+------------+-
+mask_predictions.classifier.bias        | UNEXPECTED | 
+lm_predictions.lm_head.LayerNorm.weight | UNEXPECTED | 
+mask_predictions.dense.weight           | UNEXPECTED | 
+lm_predictions.lm_head.dense.weight     | UNEXPECTED | 
+lm_predictions.lm_head.bias             | UNEXPECTED | 
+lm_predictions.lm_head.LayerNorm.bias   | UNEXPECTED | 
+mask_predictions.LayerNorm.weight       | UNEXPECTED | 
+mask_predictions.LayerNorm.bias         | UNEXPECTED | 
+lm_predictions.lm_head.dense.bias       | UNEXPECTED | 
+mask_predictions.classifier.weight      | UNEXPECTED | 
+mask_predictions.dense.bias             | UNEXPECTED | 
+classifier.weight                       | MISSING    | 
+pooler.dense.weight                     | MISSING    | 
+pooler.dense.bias                       | MISSING    | 
+classifier.bias                         | MISSING    | 
+
+Notes:
+- UNEXPECTED:   can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:      those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Loading weights: 100%|████████████| 202/202 [00:00<00:00, 6937.79it/s]
+
+---------------- sample predictions ----------------
+true=Technical Support                base[X ]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+true=Service Outages and Maintenance  base[OK]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+true=Billing and Payments             base[X ]=Service Outages and Maintenance  ft[OK]=Billing and Payments
+true=Returns and Exchanges            base[X ]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+true=General Inquiry                  base[X ]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+true=Customer Service                 base[X ]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+true=Human Resources                  base[X ]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+true=Sales and Pre-Sales              base[X ]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+true=Product Support                  base[X ]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+true=IT Support                       base[X ]=Service Outages and Maintenance  ft[X ]=Billing and Payments
+
+Saved comparison -> ./finetune/artifacts/deberta-tickets/compare.json
+Screenshot this output for the report (fine-tuning section).
+python -m pytest tests -v
+======================== test session starts =========================
+platform darwin -- Python 3.13.5, pytest-8.3.4, pluggy-1.6.0 -- /opt/anaconda3/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/naveendeswal/Documents/BITS PILANI/Semester 3/API/Assign2/OpsMedic-dev
+plugins: cov-7.1.0, anyio-4.7.0
+collected 159 items                                                  
+
+tests/test_attachments_offline.py::test_extract_plain_text_and_log PASSED [  0%]
+tests/test_attachments_offline.py::test_extract_caps_length PASSED [  1%]
+tests/test_attachments_offline.py::test_image_is_acknowledged_not_extracted PASSED [  1%]
+tests/test_attachments_offline.py::test_pdf_without_pypdf_degrades_gracefully PASSED [  2%]
+tests/test_attachments_offline.py::test_merge_incident_appends_context PASSED [  3%]
+tests/test_composer_offline.py::test_labels_and_prompts_cover_the_same_styles PASSED [  3%]
+tests/test_composer_offline.py::test_default_style_is_first_in_the_popover PASSED [  4%]
+tests/test_composer_offline.py::test_every_style_keeps_the_grounding_rule PASSED [  5%]
+tests/test_composer_offline.py::test_prompt_versions_are_unique_per_style PASSED [  5%]
+tests/test_composer_offline.py::test_resolve_style_is_total PASSED [  6%]
+tests/test_composer_offline.py::test_style_label_falls_back_safely PASSED [  6%]
+tests/test_composer_offline.py::test_default_style_prompt_is_unchanged PASSED [  7%]
+tests/test_composer_offline.py::test_style_changes_system_prompt_but_not_evidence PASSED [  8%]
+tests/test_composer_offline.py::test_unknown_style_does_not_raise_in_prompt_build PASSED [  8%]
+tests/test_composer_offline.py::test_search_modes_map_to_retrieval_flag PASSED [  9%]
+tests/test_composer_offline.py::test_init_state_seeds_once_and_does_not_clobber PASSED [ 10%]
+tests/test_composer_offline.py::test_submit_queues_text_and_clears_the_field PASSED [ 10%]
+tests/test_composer_offline.py::test_submit_ignores_blank_input PASSED [ 11%]
+tests/test_composer_offline.py::test_drain_voice_draft_moves_transcript_into_the_text_field PASSED [ 11%]
+tests/test_composer_offline.py::test_audio_signature_is_stable_and_content_addressed PASSED [ 12%]
+tests/test_config_and_data.py::test_fill_is_consistent_across_fields PASSED [ 13%]
+tests/test_config_and_data.py::test_config_imports_without_dotenv_or_env_file PASSED [ 13%]
+tests/test_config_and_data.py::test_generator_is_deterministic PASSED [ 14%]
+tests/test_config_and_data.py::test_generator_schema_and_balance PASSED [ 15%]
+tests/test_config_and_data.py::test_generate_tickets_default_output_is_separate PASSED [ 15%]
+tests/test_config_and_data.py::test_resolve_device_honours_explicit_override PASSED [ 16%]
+tests/test_config_and_data.py::test_resolve_device_auto_falls_back_to_cpu_without_torch PASSED [ 16%]
+tests/test_config_and_data.py::test_fp16_only_on_cuda PASSED   [ 17%]
+tests/test_config_and_data.py::test_upgraded_model_defaults PASSED [ 18%]
+tests/test_config_and_data.py::test_kokoro_settings_present_for_the_optional_backend PASSED [ 18%]
+tests/test_config_and_data.py::test_finetune_config_helpers_are_available PASSED [ 19%]
+tests/test_conversations_offline.py::test_make_title_truncates_on_word_boundary PASSED [ 20%]
+tests/test_conversations_offline.py::test_day_bucket_boundaries PASSED [ 20%]
+tests/test_conversations_offline.py::test_create_add_and_get_messages_roundtrip PASSED [ 21%]
+tests/test_conversations_offline.py::test_rename_if_default_sets_title_once PASSED [ 22%]
+tests/test_conversations_offline.py::test_list_ordered_by_recency_and_delete PASSED [ 22%]
+tests/test_conversations_offline.py::test_grouped_preserves_bucket_order PASSED [ 23%]
+tests/test_finetune_offline.py::test_balance_to_median_caps_majority_deterministically PASSED [ 23%]
+tests/test_finetune_offline.py::test_join_text_handles_nan_and_caps_length PASSED [ 24%]
+tests/test_finetune_offline.py::test_build_label_maps_sorted_and_inverse PASSED [ 25%]
+tests/test_finetune_offline.py::test_stratified_cap_proportions_and_determinism PASSED [ 25%]
+tests/test_finetune_offline.py::test_load_split_ids_align_with_given_labels PASSED [ 26%]
+tests/test_finetune_offline.py::test_load_split_missing_file_raises PASSED [ 27%]
+tests/test_insights_offline.py::test_feedback_summary_counts_and_ignores_malformed PASSED [ 27%]
+tests/test_insights_offline.py::test_training_curves_split_train_and_eval PASSED [ 28%]
+tests/test_insights_offline.py::test_headline_delta_matches_users_real_numbers PASSED [ 28%]
+tests/test_insights_offline.py::test_per_class_table_sorted_by_f1_desc PASSED [ 29%]
+tests/test_llmops.py::test_percentile_math PASSED              [ 30%]
+tests/test_llmops.py::test_approx_tokens PASSED                [ 30%]
+tests/test_llmops.py::test_metrics_logger_writes_rows PASSED   [ 31%]
+tests/test_llmops.py::test_metrics_logger_records_errors_and_reraises PASSED [ 32%]
+tests/test_llmops.py::test_metrics_cost_estimation_and_summary PASSED [ 32%]
+tests/test_llmops.py::test_cache_set_get_and_hit_count PASSED  [ 33%]
+tests/test_llmops.py::test_cache_ttl_expiry PASSED             [ 33%]
+tests/test_llmops.py::test_subtask_schema_and_metrics_row PASSED [ 34%]
+tests/test_llmops.py::test_subtask_error_does_not_raise_but_is_logged PASSED [ 35%]
+tests/test_llmops.py::test_subtask_exact_usage_reported PASSED [ 35%]
+tests/test_llmops.py::test_subtask_cache_hit_flow PASSED       [ 36%]
+tests/test_nav_chrome_offline.py::test_page_chrome_renders_the_topbar PASSED [ 37%]
+tests/test_nav_chrome_offline.py::test_page_chrome_renders_sidebar_and_topbar_together PASSED [ 37%]
+tests/test_nav_chrome_offline.py::test_every_crumb_label_is_mapped PASSED [ 38%]
+tests/test_nav_chrome_offline.py::test_explicit_page_name_overrides_the_crumb_map PASSED [ 38%]
+tests/test_nav_chrome_offline.py::test_topbar_markup_is_nowrap_safe PASSED [ 39%]
+tests/test_nav_chrome_offline.py::test_workspace_nav_is_collapsible_by_default PASSED [ 40%]
+tests/test_nav_chrome_offline.py::test_workspace_nav_can_stay_flat PASSED [ 40%]
+tests/test_nav_chrome_offline.py::test_section_header_returns_a_context_manager PASSED [ 41%]
+tests/test_nav_chrome_offline.py::test_sidebar_nav_wraps_navigate_section PASSED [ 42%]
+tests/test_nav_chrome_offline.py::test_active_page_is_a_button_and_others_are_links PASSED [ 42%]
+tests/test_nav_chrome_offline.py::test_expander_summary_is_styled_as_a_section_label PASSED [ 43%]
+tests/test_nav_chrome_offline.py::test_sidebar_label_rules_target_the_inner_paragraph PASSED [ 44%]
+tests/test_nav_chrome_offline.py::test_no_duplicate_sidebar_button_base_rule PASSED [ 44%]
+tests/test_nav_chrome_offline.py::test_sidebar_metrics_are_size_capped PASSED [ 45%]
+tests/test_prepare_dataset.py::test_read_raw_dir_concatenates_multiple_csvs PASSED [ 45%]
+tests/test_prepare_dataset.py::test_queue_slug_matches_sop_filenames PASSED [ 46%]
+tests/test_prepare_dataset.py::test_normalize_filters_schema_and_ids PASSED [ 47%]
+tests/test_prepare_dataset.py::test_normalize_rejects_wrong_schema PASSED [ 47%]
+tests/test_prepare_dataset.py::test_normalize_keeps_all_queues_when_top_queues_is_zero PASSED [ 48%]
+tests/test_prepare_dataset.py::test_stratified_split_deterministic_and_leak_free PASSED [ 49%]
+tests/test_streaming_offline.py::test_stream_yields_chunks_logs_one_row_and_caches PASSED [ 49%]
+tests/test_streaming_offline.py::test_stream_fallback_without_key PASSED [ 50%]
+tests/test_streaming_offline.py::test_streamed_latency_is_the_real_generation_time PASSED [ 50%]
+tests/test_streaming_offline.py::test_streamed_row_records_ttft_and_throughput PASSED [ 51%]
+tests/test_streaming_offline.py::test_track_latency_override_is_used_verbatim PASSED [ 52%]
+tests/test_subtasks_offline.py::test_artifact_version_stamp PASSED [ 52%]
+tests/test_subtasks_offline.py::test_filter_hits_threshold_padding_and_snippet PASSED [ 53%]
+tests/test_subtasks_offline.py::test_filter_hits_keeps_order_and_all_above_threshold PASSED [ 54%]
+tests/test_subtasks_offline.py::test_build_prompt_grounds_on_similar_and_sop PASSED [ 54%]
+tests/test_subtasks_offline.py::test_build_prompt_without_similar_or_category PASSED [ 55%]
+tests/test_subtasks_offline.py::test_load_sop_missing_category_is_empty PASSED [ 55%]
+tests/test_subtasks_offline.py::test_pick_variant_rules PASSED [ 56%]
+tests/test_subtasks_offline.py::test_resolve_labels_sorted_and_nonempty PASSED [ 57%]
+tests/test_subtasks_offline.py::test_to_mono_16k_downmixes_stereo PASSED [ 57%]
+tests/test_subtasks_offline.py::test_to_mono_16k_passthrough_at_target_rate PASSED [ 58%]
+tests/test_theme_selectors_offline.py::test_composer_scope_matches_exactly_one_block PASSED [ 59%]
+tests/test_theme_selectors_offline.py::test_chips_scope_matches_exactly_one_block PASSED [ 59%]
+tests/test_theme_selectors_offline.py::test_naive_selector_would_have_leaked PASSED [ 60%]
+tests/test_theme_selectors_offline.py::test_send_rule_hits_only_the_send_button PASSED [ 61%]
+tests/test_theme_selectors_offline.py::test_send_rule_spares_the_suggestion_chips PASSED [ 61%]
+tests/test_theme_selectors_offline.py::test_send_rule_spares_popover_panel_buttons PASSED [ 62%]
+tests/test_theme_selectors_offline.py::test_send_rule_spares_sidebar_and_feedback_buttons PASSED [ 62%]
+tests/test_theme_selectors_offline.py::test_pill_rule_hits_every_popover_trigger PASSED [ 63%]
+tests/test_theme_selectors_offline.py::test_text_input_rule_reaches_the_baseweb_wrapper PASSED [ 64%]
+tests/test_theme_selectors_offline.py::test_anchor_containers_are_hidden PASSED [ 64%]
+tests/test_theme_selectors_offline.py::test_css_declares_every_scoped_rule_with_the_safe_scopes PASSED [ 65%]
+tests/test_theme_selectors_offline.py::test_scopes_are_independent_of_sibling_position PASSED [ 66%]
+tests/test_theme_selectors_offline.py::test_started_conversation_has_no_chips_but_composer_still_scoped PASSED [ 66%]
+tests/test_theme_selectors_offline.py::test_sidebar_label_rule_matches_the_paragraph_not_the_button PASSED [ 67%]
+tests/test_theme_selectors_offline.py::test_sidebar_rule_does_not_touch_composer_pills PASSED [ 67%]
+tests/test_tts_offline.py::test_string_payload_writes_a_wav_and_reports_metadata PASSED [ 68%]
+tests/test_tts_offline.py::test_each_sentence_is_synthesized_separately PASSED [ 69%]
+tests/test_tts_offline.py::test_numbered_steps_are_spoken_as_ordinals PASSED [ 69%]
+tests/test_tts_offline.py::test_markdown_is_not_sent_to_the_model PASSED [ 70%]
+tests/test_tts_offline.py::test_dead_air_is_trimmed_so_output_is_shorter_than_raw_synthesis PASSED [ 71%]
+tests/test_tts_offline.py::test_peak_is_normalised_to_the_configured_target PASSED [ 71%]
+tests/test_tts_offline.py::test_per_call_tone_overrides_are_honoured_and_reported PASSED [ 72%]
+tests/test_tts_offline.py::test_defaults_come_from_config PASSED [ 72%]
+tests/test_tts_offline.py::test_custom_out_path_is_used PASSED [ 73%]
+tests/test_tts_offline.py::test_char_budget_truncates_on_a_chunk_boundary PASSED [ 74%]
+tests/test_tts_offline.py::test_empty_text_is_an_error_not_a_crash PASSED [ 74%]
+tests/test_tts_offline.py::test_markdown_only_text_is_reported_as_unspeakable PASSED [ 75%]
+tests/test_tts_offline.py::test_synthesis_returning_nothing_is_an_error PASSED [ 76%]
+tests/test_tts_offline.py::test_failure_still_logs_a_metrics_row PASSED [ 76%]
+tests/test_tts_offline.py::test_vits_knobs_are_applied_and_reported PASSED [ 77%]
+tests/test_tts_offline.py::test_missing_knob_attributes_are_skipped_not_fatal PASSED [ 77%]
+tests/test_tts_offline.py::test_single_pass_makes_exactly_one_synth_call PASSED [ 78%]
+tests/test_tts_offline.py::test_single_pass_still_strips_markdown_and_speaks_steps PASSED [ 79%]
+tests/test_tts_offline.py::test_single_pass_has_no_inserted_pauses PASSED [ 79%]
+tests/test_tts_offline.py::test_chunked_and_single_pass_differ_in_call_count PASSED [ 80%]
+tests/test_tts_offline.py::test_single_pass_truncates_on_a_word_boundary PASSED [ 81%]
+tests/test_tts_offline.py::test_default_knobs_do_not_alter_synthesis FAILED [ 81%]
+tests/test_tts_offline.py::test_render_chunks_skips_silent_synthesis_and_drops_trailing_gap PASSED [ 82%]
+tests/test_tts_offline.py::test_render_chunks_respects_budget_but_always_renders_one PASSED [ 83%]
+tests/test_tts_offline.py::test_backend_is_chosen_from_the_model_name PASSED [ 83%]
+tests/test_tts_offline.py::test_kokoro_missing_package_gives_an_actionable_error PASSED [ 84%]
+tests/test_tts_offline.py::test_kokoro_synthesis_path_accepts_the_generator_shape PASSED [ 84%]
+tests/test_tts_offline.py::test_kokoro_empty_output_is_an_actionable_error PASSED [ 85%]
+tests/test_tts_offline.py::test_vits_knobs_are_skipped_for_a_non_vits_backend PASSED [ 86%]
+tests/test_tts_offline.py::test_output_reports_backend_device_and_voice PASSED [ 86%]
+tests/test_tts_prosody_offline.py::test_numbered_steps_become_spoken_ordinals PASSED [ 87%]
+tests/test_tts_prosody_offline.py::test_step_prefix_variants_all_parse PASSED [ 88%]
+tests/test_tts_prosody_offline.py::test_markdown_is_stripped_not_spoken PASSED [ 88%]
+tests/test_tts_prosody_offline.py::test_bullets_get_a_longer_pause_before_them PASSED [ 89%]
+tests/test_tts_prosody_offline.py::test_sentences_split_but_abbreviations_survive PASSED [ 89%]
+tests/test_tts_prosody_offline.py::test_clause_gaps_are_shorter_than_sentence_gaps PASSED [ 90%]
+tests/test_tts_prosody_offline.py::test_empty_and_whitespace_text_is_safe PASSED [ 91%]
+tests/test_tts_prosody_offline.py::test_chunk_equality_helper PASSED [ 91%]
+tests/test_tts_prosody_offline.py::test_presence_lift_raises_the_intelligibility_band PASSED [ 92%]
+tests/test_tts_prosody_offline.py::test_presence_amount_is_monotonic_and_zero_is_a_noop PASSED [ 93%]
+tests/test_tts_prosody_offline.py::test_cut_rumble_attenuates_sub_speech_boom PASSED [ 93%]
+tests/test_tts_prosody_offline.py::test_soften_defaults_to_a_noop_because_the_output_is_already_dull PASSED [ 94%]
+tests/test_tts_prosody_offline.py::test_clarity_chain_does_not_gut_the_fundamental PASSED [ 94%]
+tests/test_tts_prosody_offline.py::test_trim_silence_strips_padding_but_keeps_a_margin PASSED [ 95%]
+tests/test_tts_prosody_offline.py::test_trim_silence_on_all_silence_returns_empty PASSED [ 96%]
+tests/test_tts_prosody_offline.py::test_normalize_peak_hits_the_target_and_never_boosts_silence PASSED [ 96%]
+tests/test_tts_prosody_offline.py::test_fades_prevent_clicks_at_the_joins PASSED [ 97%]
+tests/test_tts_prosody_offline.py::test_join_inserts_the_requested_pauses PASSED [ 98%]
+tests/test_tts_prosody_offline.py::test_join_of_nothing_is_empty_not_a_crash PASSED [ 98%]
+tests/test_tts_prosody_offline.py::test_finalize_clarifies_and_tames_the_level_together PASSED [ 99%]
+tests/test_tts_prosody_offline.py::test_default_peak_is_below_the_raw_mms_level PASSED [100%]
+
+============================== FAILURES ==============================
+_____________ test_default_knobs_do_not_alter_synthesis ______________
+
+    def test_default_knobs_do_not_alter_synthesis():
+        """The approved sample was EQ over DEFAULT-synthesised audio."""
+        from src import config as cfg
+>       assert cfg.TTS_SPEAKING_RATE == 1.0
+E       AssertionError: assert 0.9 == 1.0
+E        +  where 0.9 = <module 'src.config' from '/Users/naveendeswal/Documents/BITS PILANI/Semester 3/API/Assign2/OpsMedic-dev/src/config.py'>.TTS_SPEAKING_RATE
+
+tests/test_tts_offline.py:322: AssertionError
+====================== short test summary info =======================
+FAILED tests/test_tts_offline.py::test_default_knobs_do_not_alter_synthesis - AssertionError: assert 0.9 == 1.0
+=================== 1 failed, 158 passed in 3.95s ====================
+make: *** [test] Error 1
