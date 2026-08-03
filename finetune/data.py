@@ -131,6 +131,51 @@ def load_split(
     return texts, label_ids, labels
 
 
+def class_weights(label_ids: list[int], num_labels: int) -> list[float]:
+    """Inverse-frequency class weights with a sample-weighted mean of 1.0.
+
+    The preferred alternative to `balance_to_median` when training on the
+    FULL split: instead of throwing away majority-class rows, rare classes
+    get a larger loss contribution. Weight for class c is
+
+        w_c = N / (K * n_c)
+
+    where N is the number of rows, K the number of classes and n_c the
+    rows in class c. This satisfies sum(n_c * w_c) == N, i.e. the average
+    loss scale over the dataset is unchanged - only its distribution
+    across classes shifts. Unseen classes get weight 1.0 so the vector is
+    always finite and of length `num_labels`.
+    """
+    if num_labels <= 0:
+        raise ValueError("num_labels must be positive")
+    counts = [0] * num_labels
+    for i in label_ids:
+        if not 0 <= i < num_labels:
+            raise ValueError(f"label id {i} outside 0..{num_labels - 1}")
+        counts[i] += 1
+    total = sum(counts)
+    if total == 0:
+        return [1.0] * num_labels
+    return [
+        (total / (num_labels * n)) if n else 1.0
+        for n in counts
+    ]
+
+
+def split_stats(label_ids: list[int], labels: list[str]) -> list[tuple[str, int, float]]:
+    """(label, rows, share) per class, sorted by rows descending.
+
+    Printed before training so the run log in the report shows exactly
+    which distribution the model saw.
+    """
+    counts = [0] * len(labels)
+    for i in label_ids:
+        counts[i] += 1
+    total = sum(counts) or 1
+    rows = [(labels[i], counts[i], counts[i] / total) for i in range(len(labels))]
+    return sorted(rows, key=lambda r: (-r[1], r[0]))
+
+
 def default_paths() -> dict[str, str]:
     """Central place for the artifact paths used across scripts."""
     art = config.CLASSIFIER_FINETUNED_DIR
