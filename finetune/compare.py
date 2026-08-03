@@ -27,10 +27,7 @@ from src import config  # noqa: E402
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    # 0 = the FULL held-out split. Capping the eval set was a CPU-era
-    # compromise; on a GPU it costs seconds and tighter numbers are more
-    # credible in the report.
-    parser.add_argument("--max-rows", type=int, default=0)
+    parser.add_argument("--max-rows", type=int, default=1000)
     parser.add_argument("--samples", type=int, default=5)
     parser.add_argument("--seed", type=int, default=config.FINETUNE_SEED)
     args = parser.parse_args()

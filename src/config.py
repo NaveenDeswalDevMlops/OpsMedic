@@ -46,60 +46,16 @@ RESOLUTION_MODEL: str = os.getenv("RESOLUTION_MODEL", "llama-3.1-8b-instant")
 EMBEDDING_MODEL: str = os.getenv(
     "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
 )
-SUMMARIZER_MODEL: str = os.getenv("SUMMARIZER_MODEL", "facebook/bart-large-cnn")
-# DeBERTa-v3-base (184M, MIT) beats DistilBERT on short jargon-dense text and
-# is the one model we fine-tune, so it drives the before/after numbers.
-# NOTE: needs `sentencepiece` installed, and is learning-rate sensitive —
-# train at ~2e-5, not the 5e-5 that suited DistilBERT.
+SUMMARIZER_MODEL: str = os.getenv("SUMMARIZER_MODEL", "sshleifer/distilbart-cnn-12-6")
 CLASSIFIER_BASE_MODEL: str = os.getenv(
-    "CLASSIFIER_BASE_MODEL", "microsoft/deberta-v3-base"
+    "CLASSIFIER_BASE_MODEL", "distilbert-base-uncased"
 )
 CLASSIFIER_FINETUNED_DIR: str = os.getenv(
-    "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/deberta-tickets"
+    "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/distilbert-tickets"
 )
 # Speech Recognition category
-# whisper-medium (769M) — chosen for accuracy now that a GPU is available.
-# Note it is ~3x whisper-small: on a FANLESS MacBook Air expect noticeably
-# slower transcription and thermal throttling over a long demo session. Drop
-# back for a live demo with:  ASR_MODEL=openai/whisper-small
-ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-medium")
-# Default stays mms-tts-eng so a fresh clone runs with no extra system
-# packages. Kokoro-82M sounds markedly better (24 kHz, real voice presets)
-# but needs `pip install kokoro` AND the espeak-ng binary, so it is opt-in:
-#     TTS_MODEL=hexgrad/Kokoro-82M
-# models/tts.py picks the backend from this string.
+ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-tiny")
 TTS_MODEL: str = os.getenv("TTS_MODEL", "facebook/mms-tts-eng")
-# Kokoro voice presets: af_*/am_* American female/male, bf_*/bm_* British.
-KOKORO_VOICE: str = os.getenv("KOKORO_VOICE", "bf_emma")
-KOKORO_LANG: str = os.getenv("KOKORO_LANG", "b")   # 'a' American, 'b' British
-KOKORO_SPEED: float = float(os.getenv("KOKORO_SPEED", "1.0"))
-
-# --- TTS delivery / tone (see models/tts_prosody.py) ---
-# Measured on real mms-tts-eng output: 83% of energy below 500 Hz and only
-# 2.7% in the 1.5-4 kHz consonant band, i.e. boomy and mushy rather than
-# harsh. So the chain LIFTS presence and cuts rumble; softening defaults
-# off and is only for a future brighter engine.
-TTS_PRESENCE: float = float(os.getenv("TTS_PRESENCE", "0.30"))
-TTS_RUMBLE_CUT: float = float(os.getenv("TTS_RUMBLE_CUT", "0.6"))
-TTS_SOFTEN: float = float(os.getenv("TTS_SOFTEN", "0.0"))
-TTS_PEAK: float = float(os.getenv("TTS_PEAK", "0.72"))
-TTS_MAX_CHARS: int = int(os.getenv("TTS_MAX_CHARS", "900"))
-# Chunked delivery: synthesize sentence-by-sentence and rejoin with
-# deliberate pauses. Fixes the 34% dead air, but prosody resets per chunk,
-# so the result differs audibly from a single continuous pass. Set 0 to get
-# the single-pass path (raw text -> one synth call -> EQ), which is exactly
-# what the approved tone sample used.
-TTS_CHUNKED: bool = _get_bool("TTS_CHUNKED", True)
-
-# VITS sampling knobs. Defaults are the model's OWN defaults, i.e. no change
-# to synthesis: the approved tone sample was EQ applied on top of
-# default-synthesised audio, so deviating here changes the voice itself.
-# speaking_rate <1 slows delivery; noise_scale_duration is the stochastic
-# duration temperature (rhythm variability). Tune only after A/B-ing.
-TTS_SPEAKING_RATE: float = float(os.getenv("TTS_SPEAKING_RATE", "1.0"))
-TTS_NOISE_SCALE: float = float(os.getenv("TTS_NOISE_SCALE", "0.667"))
-TTS_NOISE_SCALE_DURATION: float = float(
-    os.getenv("TTS_NOISE_SCALE_DURATION", "0.8"))
 
 # --- Data: Customer IT Support ticket dataset (with resolutions) ----
 # Citation: T. Bueck, "Customer Support Tickets", Hugging Face.
@@ -140,74 +96,6 @@ PRICE_PER_MTOK: dict[str, dict[str, float]] = {
 
 # --- Fine-tuning -----------------------------------------------------
 # Public dataset id is pinned inside finetune/data.py with its citation.
-# 0 = full prepared dataset. These defaults apply when train.py is invoked
-# WITHOUT --max-rows / --epochs. They were 2000/2 while training was
-# CPU-bound; with a GPU, capping the data is the thing most likely to make
-# the fine-tune look worse than it should.
-FINETUNE_MAX_ROWS: int = int(os.getenv("FINETUNE_MAX_ROWS", "0"))
-FINETUNE_EPOCHS: int = int(os.getenv("FINETUNE_EPOCHS", "3"))
+FINETUNE_MAX_ROWS: int = int(os.getenv("FINETUNE_MAX_ROWS", "2000"))
+FINETUNE_EPOCHS: int = int(os.getenv("FINETUNE_EPOCHS", "2"))
 FINETUNE_SEED: int = int(os.getenv("FINETUNE_SEED", "42"))
-
-
-# --- Compute device -------------------------------------------------
-def resolve_device() -> str:
-    """Return 'cuda', 'mps' or 'cpu' for model placement.
-
-    A function rather than a module constant so importing config stays
-    cheap — torch is only imported when a model is actually loaded.
-
-    Set DEVICE=cpu in .env to force a fallback; on Apple Silicon also set
-    PYTORCH_ENABLE_MPS_FALLBACK=1, because a few ops are still
-    unimplemented on the MPS backend and hard-error without it.
-    """
-    want = os.getenv("DEVICE", "auto").strip().lower()
-    if want and want != "auto":
-        return want
-    try:
-        import torch
-
-        if torch.cuda.is_available():
-            return "cuda"
-        mps = getattr(torch.backends, "mps", None)
-        if mps is not None and mps.is_available():
-            return "mps"
-    except Exception:  # noqa: BLE001 - never let device probing break startup
-        pass
-    return "cpu"
-
-
-def use_fp16() -> bool:
-    """fp16 is safe on CUDA; on MPS it still produces NaNs in some models."""
-    return resolve_device() == "cuda"
-
-
-#: Checkpoints that reliably produce NaN losses under fp16 training. The
-#: DeBERTa family is the well-known case: its disentangled attention
-#: overflows in half precision, and the failure looks like loss=nan a few
-#: hundred steps in rather than an error, so it is easy to waste GPU hours.
-FP16_UNSTABLE: tuple[str, ...] = (
-    "deberta-v3-large",
-    "deberta-v2-xlarge",
-    "deberta-v2-xxlarge",
-)
-
-
-def train_fp16(model_name: str | None = None) -> bool:
-    """Whether to enable fp16 for a TRAINING run.
-
-    Requires CUDA and a checkpoint not on the unstable list. Override
-    either way with TRAIN_FP16=1 / TRAIN_FP16=0 in .env.
-    """
-    override = os.getenv("TRAIN_FP16")
-    if override is not None and override.strip() != "":
-        return override.strip().lower() in ("1", "true", "yes", "on")
-    if not use_fp16():
-        return False
-    name = (model_name or CLASSIFIER_BASE_MODEL).lower()
-    return not any(bad in name for bad in FP16_UNSTABLE)
-
-
-def is_large_encoder(model_name: str | None = None) -> bool:
-    """True for *-large / *-xlarge checkpoints, which need gentler settings."""
-    name = (model_name or CLASSIFIER_BASE_MODEL).lower()
-    return any(tag in name for tag in ("large", "xlarge", "xxlarge"))

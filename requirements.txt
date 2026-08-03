@@ -36,17 +36,6 @@ pypdf==4.3.1
 psutil==6.0.0
 python-dotenv==1.0.1
 
-# --- Tokenizer backend ---
-# REQUIRED by microsoft/deberta-v3-base (sentencepiece tokenizer). Without it
-# AutoTokenizer.from_pretrained raises at classifier load time.
-sentencepiece==0.2.0
-
-# --- Optional: better TTS voice (24 kHz, real voice presets) ---
-# Opt in with TTS_MODEL=hexgrad/Kokoro-82M. Also needs the espeak-ng BINARY:
-#   macOS: brew install espeak-ng      Debian/Ubuntu: apt-get install espeak-ng
-# Left commented so a fresh clone installs without a system package.
-# kokoro==0.9.4
-
 # --- Tests ---
 pytest==8.3.2
 # beautifulsoup4 ships soupsieve, the CSS engine used by
@@ -54,3 +43,4 @@ pytest==8.3.2
 # selectors against a replica of Streamlit's DOM. Test-only, pure Python;
 # that suite skips itself if this is missing, so the app never needs it.
 beautifulsoup4==4.12.3
+

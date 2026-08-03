@@ -72,7 +72,7 @@ def predict_batched(
 def evaluate_model(
     model_source: str,
     labels: list[str],
-    max_rows: int = 0,          # 0 = full held-out split
+    max_rows: int = 1000,
     seed: int = 42,
 ) -> dict[str, Any]:
     """Run held-out evaluation; returns a JSON-serializable report."""
@@ -118,7 +118,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--variant", choices=["base", "finetuned"],
                         default="finetuned")
-    parser.add_argument("--max-rows", type=int, default=0)
+    parser.add_argument("--max-rows", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=config.FINETUNE_SEED)
     args = parser.parse_args()
 

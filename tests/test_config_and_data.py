@@ -33,7 +33,7 @@ def test_fill_is_consistent_across_fields():
 def test_config_imports_without_dotenv_or_env_file():
     # Import already happened at module load; verify key defaults exist.
     assert config.PRODUCT_NAME  # non-empty
-    assert config.ASR_MODEL == os.getenv("ASR_MODEL", "openai/whisper-small")
+    assert config.ASR_MODEL == os.getenv("ASR_MODEL", "openai/whisper-tiny")
     assert isinstance(config.TOP_K, int) and config.TOP_K > 0
     assert 0.0 <= config.SIMILARITY_THRESHOLD <= 1.0
     assert "llama-3.1-8b-instant" in config.PRICE_PER_MTOK
@@ -67,57 +67,6 @@ def test_generator_schema_and_balance():
     assert all(v == 10 for v in counts.values())
     # Unique ticket ids
     assert len({r["ticket_id"] for r in rows}) == 60
-
-
-def test_resolve_device_honours_explicit_override():
-    """DEVICE=cpu must force CPU even where an accelerator exists."""
-    import importlib
-    from src import config as cfg
-    for want in ("cpu", "mps", "cuda"):
-        os.environ["DEVICE"] = want
-        importlib.reload(cfg)
-        assert cfg.resolve_device() == want, want
-    os.environ.pop("DEVICE", None)
-    importlib.reload(cfg)
-
-
-def test_resolve_device_auto_falls_back_to_cpu_without_torch():
-    """No torch in this environment, so auto-detection must not raise."""
-    import importlib
-    from src import config as cfg
-    os.environ["DEVICE"] = "auto"
-    importlib.reload(cfg)
-    assert cfg.resolve_device() in ("cpu", "mps", "cuda")
-    os.environ.pop("DEVICE", None)
-    importlib.reload(cfg)
-
-
-def test_fp16_only_on_cuda():
-    """fp16 on MPS still produces NaNs in some models, so it must be off."""
-    import importlib
-    from src import config as cfg
-    os.environ["DEVICE"] = "mps"
-    importlib.reload(cfg)
-    assert cfg.use_fp16() is False
-    os.environ["DEVICE"] = "cuda"
-    importlib.reload(cfg)
-    assert cfg.use_fp16() is True
-    os.environ.pop("DEVICE", None)
-    importlib.reload(cfg)
-
-
-def test_upgraded_model_defaults():
-    assert config.ASR_MODEL.endswith("whisper-small")
-    assert "bart-large-cnn" in config.SUMMARIZER_MODEL
-    assert "deberta-v3-base" in config.CLASSIFIER_BASE_MODEL
-    # TTS default stays on the dependency-free voice; Kokoro is opt-in
-    assert "mms-tts" in config.TTS_MODEL
-
-
-def test_kokoro_settings_present_for_the_optional_backend():
-    assert config.KOKORO_VOICE
-    assert config.KOKORO_LANG in ("a", "b")
-    assert config.KOKORO_SPEED > 0
 
 
 # ------------------------------------------------------- stdlib test runner

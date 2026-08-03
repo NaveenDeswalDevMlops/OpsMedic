@@ -206,16 +206,7 @@ def render_assistant_meta(meta: dict[str, Any], key: str) -> None:
             r = get_task("tts").run(
                 {"text": meta["summary"], "out_path": "./data/tts_out.wav"})
         if r["metrics"]["status"] == "ok":
-            o = r["output"]
-            st.audio(o["audio_path"])
-            st.caption(
-                f"{o['duration_s']}s · {o['chunks']} phrase"
-                f"{'s' if o['chunks'] != 1 else ''} · presence "
-                f"{o['presence_ratio'] * 100:.1f}% of spectrum"
-                + (" · truncated to fit" if o.get("truncated") else "")
-            )
-        else:
-            st.error(r["metrics"].get("error", "Speech synthesis failed."))
+            st.audio(r["output"]["audio_path"])
 
 
 # --------------------------------------------------- top breadcrumb

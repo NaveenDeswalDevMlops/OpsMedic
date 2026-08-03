@@ -147,18 +147,11 @@ class MetricsLogger:
 
     # -- write path ---------------------------------------------------
     @contextmanager
-    def track(self, subtask: str, model: str,
-              latency_ms: float | None = None) -> Iterator[_Record]:
+    def track(self, subtask: str, model: str) -> Iterator[_Record]:
         """Context manager: times the block and writes one metrics row.
 
         Exceptions inside the block are logged as status='error' and
         re-raised, so callers keep their normal error handling.
-
-        `latency_ms` overrides the measured duration. Streaming callers
-        need this: they can only write their row once the stream is
-        exhausted, so the block being timed is just bookkeeping and the
-        real generation time has to be passed in. Without it, streamed
-        latency was recorded as ~0 ms.
         """
         rec = _Record(subtask=subtask, model=model)
         start = time.perf_counter()
@@ -169,13 +162,8 @@ class MetricsLogger:
             status, error_text = "error", f"{type(exc).__name__}: {exc}"
             raise
         finally:
-            measured = (time.perf_counter() - start) * 1000.0
-            self._write(
-                rec,
-                measured if latency_ms is None else float(latency_ms),
-                status,
-                error_text,
-            )
+            latency_ms = (time.perf_counter() - start) * 1000.0
+            self._write(rec, latency_ms, status, error_text)
 
     def _write(
         self, rec: _Record, latency_ms: float, status: str, error_text: str | None

@@ -31,11 +31,7 @@ class SummarizerTask(BaseSubTask):
         if self._pipe is None:
             from transformers import pipeline  # lazy heavy import
 
-            self._pipe = pipeline(
-                "summarization",
-                model=self.model_name,
-                device=config.resolve_device(),
-            )
+            self._pipe = pipeline("summarization", model=self.model_name)
 
     def _run(self, payload: Any) -> str:
         text = str(payload).strip()
