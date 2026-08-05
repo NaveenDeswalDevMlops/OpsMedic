@@ -1,5 +1,5 @@
 # models/resolution.py
-"""Sub-task 2 (NLP / GenAI): grounded resolution generation.
+"""Sub-task 3 (NLP / GenAI): grounded resolution generation.
 
 Takes the new incident plus the retrieved similar tickets (with their
 real resolutions) and the linked category SOP, and asks a Groq-hosted

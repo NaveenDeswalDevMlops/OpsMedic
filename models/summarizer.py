@@ -1,5 +1,5 @@
 # models/summarizer.py
-"""Sub-task 3 (NLP): ticket / resolution summarization.
+"""Sub-task 4 (NLP): ticket / resolution summarization.
 
 Condenses a long ticket thread or generated resolution into a 2-3
 sentence handover summary (for shift notes and the TTS read-out).

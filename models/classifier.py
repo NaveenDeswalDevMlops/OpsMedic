@@ -1,19 +1,26 @@
 # models/classifier.py
-"""Sub-task 4 (NLP): ticket queue classification - the fine-tuned sub-task.
+"""Sub-task 2 (NLP): ticket queue classification - the fine-tuned sub-task.
 
 Predicts which queue/category a new incident belongs to. Two variants,
 switchable at construction (and via a UI toggle in the app):
 
-  variant="base"       distilbert-base-uncased with a randomly
-                       initialized 10-class head -> near-random accuracy.
-                       This is the honest "before" baseline.
+  variant="base"       CLASSIFIER_BASE_MODEL (microsoft/deberta-v3-base)
+                       with a randomly initialized 10-class head. Note
+                       this is a chance-level floor, not a tuned
+                       competitor: the head is re-randomised on every
+                       construction, so its score moves between runs.
+                       Compare against the majority-class baseline
+                       (0.289 on our test split) for a stable reference.
   variant="finetuned"  the same architecture after finetune/train.py has
                        trained it on the dataset's train split -> the
                        "after". Loaded from CLASSIFIER_FINETUNED_DIR.
   variant="auto"       finetuned if the artifact exists, else base.
 
-Model: DistilBERT (66M params). Chosen for: minutes-scale CPU
-fine-tuning, strong text-classification accuracy for its size, free.
+Model: DeBERTa-v3-base (184M params), read from config so the choice is
+never hard-coded here. Chosen for: disentangled attention and
+ELECTRA-style pre-training give it a clear edge over BERT/DistilBERT at
+the same depth on short, jargon-dense ticket text, while still being
+small enough to fine-tune in a free GPU session.
 """
 from __future__ import annotations
 

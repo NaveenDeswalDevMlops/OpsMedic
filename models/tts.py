@@ -93,6 +93,8 @@ class TTSTask(BaseSubTask):
                             "audio_path": out_path,
                             "sampling_rate": sr,
                             "duration_s": round(len(data) / sr, 2),
+                            "engine": f"macos-say:{voice}",
+                            "fallback": True,
                         }
                     finally:
                         for path in (tmp_txt, tmp_audio):
@@ -121,6 +123,8 @@ class TTSTask(BaseSubTask):
             "audio_path": out_path,
             "sampling_rate": sr,
             "duration_s": round(len(wave) / sr, 2),
+            "engine": "tone-stream",
+            "fallback": True,
         }
 
     def _run(self, payload: Any) -> dict[str, Any]:
@@ -171,6 +175,21 @@ class TTSTask(BaseSubTask):
                 "audio_path": out_path,
                 "sampling_rate": sr,
                 "duration_s": round(len(audio) / sr, 2),
+                "engine": self.model_name,
+                "fallback": False,
             }
-        except Exception:
-            return self._write_fallback_audio(text, out_path)
+        except Exception as exc:  # noqa: BLE001
+            # Never fail the journey, but never hide the degradation either:
+            # the fallback is macOS `say` or a tone stream, NOT real synthesis.
+            import warnings
+
+            warnings.warn(
+                f"TTS model {self.model_name!r} failed ({type(exc).__name__}: "
+                f"{exc}); falling back to non-VITS audio. The report must not "
+                f"claim VITS synthesis for this output.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            out = self._write_fallback_audio(text, out_path)
+            out["fallback_reason"] = f"{type(exc).__name__}: {exc}"
+            return out
