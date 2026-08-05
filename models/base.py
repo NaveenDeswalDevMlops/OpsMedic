@@ -21,6 +21,17 @@ from llmops.cache import ResponseCache
 from llmops.metrics import MetricsLogger, approx_tokens
 
 
+def resolve_device() -> str:
+    """Prefer Apple MPS, then CUDA, then CPU for local inference."""
+    import torch
+
+    if getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available():
+        return "mps"
+    if torch.cuda.is_available():
+        return "cuda"
+    return "cpu"
+
+
 class BaseSubTask(ABC):
     #: unique short id, e.g. "retrieve", "resolve", "summarize",
     #: "classify", "asr", "tts"  (set by subclasses)

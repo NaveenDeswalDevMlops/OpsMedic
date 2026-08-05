@@ -18,7 +18,7 @@ steps** (Groq Llama RAG over past fixes + the linked SOP),
 ## Architecture
 
 ```
- 🎙 voice ─► [ASR whisper-tiny] ─► incident text ◄─ ⌨️ typed
+ 🎙 voice ─► [ASR openai/whisper-large] ─► incident text ◄─ ⌨️ typed
                                         │
                         [classify: DistilBERT fine-tuned]──► queue
                                         │                      │
@@ -29,7 +29,7 @@ steps** (Groq Llama RAG over past fixes + the linked SOP),
                                         │
                         [summarize: distilbart-cnn]
                             │                   │
-                     handover text      [TTS mms-tts-eng] ─► 🔊
+                     handover text      [TTS espnet/kan-bayashi_ljspeech_vits] ─► 🔊
         every call ─► llmops (SQLite): latency p50/p95, tokens,
         cost, errors, cache hits, throughput, feedback, versions
 ```
@@ -104,9 +104,9 @@ the anti-hallucination contract — enforced by a test.
 | Retrieval | sentence-transformers/all-MiniLM-L6-v2 | strong similarity, ~10 ms/query CPU |
 | Resolution | llama-3.1-8b-instant (Groq API, free tier) | fluent grounded generation, near-zero cost |
 | Summarize | sshleifer/distilbart-cnn-12-6 | near-BART ROUGE at 2× CPU speed |
-| Classify | distilbert-base-uncased → fine-tuned | minutes-scale fine-tuning, strong for size |
-| ASR | openai/whisper-tiny | real-time CPU transcription |
-| TTS | facebook/mms-tts-eng | simple local VITS, no vocoder setup |
+107:| Classify | microsoft/deberta-v3-base → fine-tuned | strong base-v3 classification |
+108:| ASR | openai/whisper-large | stronger GPU transcription |
+109:| TTS | espnet/kan-bayashi_ljspeech_vits | higher-quality English VITS |
 
 ## Dataset (cited)
 

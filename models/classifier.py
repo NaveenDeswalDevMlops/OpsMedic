@@ -21,7 +21,7 @@ import json
 import os
 from typing import Any
 
-from models.base import BaseSubTask
+from models.base import BaseSubTask, resolve_device
 from src import config
 
 # Fallback label set (the dataset's top-10 queues) used only when neither
@@ -112,6 +112,7 @@ class ClassifierTask(BaseSubTask):
             pipeline,
         )
 
+        device = resolve_device()
         id2label = {i: lab for i, lab in enumerate(self.labels)}
         label2id = {lab: i for i, lab in enumerate(self.labels)}
         model = AutoModelForSequenceClassification.from_pretrained(
@@ -119,14 +120,21 @@ class ClassifierTask(BaseSubTask):
             num_labels=len(self.labels),
             id2label=id2label,
             label2id=label2id,
-        )
+        ).to(device)
         tokenizer = AutoTokenizer.from_pretrained(
             config.CLASSIFIER_BASE_MODEL
             if self.variant == "base"
             else self._model_path
         )
+        pipeline_device: int | str
+        if device == "cuda":
+            pipeline_device = 0
+        elif device == "mps":
+            pipeline_device = "mps"
+        else:
+            pipeline_device = -1
         self._pipe = pipeline(
-            "text-classification", model=model, tokenizer=tokenizer
+            "text-classification", model=model, tokenizer=tokenizer, device=pipeline_device
         )
 
     def _run(self, payload: Any) -> dict[str, Any]:

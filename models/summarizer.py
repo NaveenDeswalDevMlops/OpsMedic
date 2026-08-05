@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from models.base import BaseSubTask
+from models.base import BaseSubTask, resolve_device
 from src import config
 
 MAX_INPUT_CHARS = 3500  # ~ model's 1024-token limit with margin
@@ -31,7 +31,15 @@ class SummarizerTask(BaseSubTask):
         if self._pipe is None:
             from transformers import pipeline  # lazy heavy import
 
-            self._pipe = pipeline("summarization", model=self.model_name)
+            device = resolve_device()
+            pipeline_device: int | str
+            if device == "cuda":
+                pipeline_device = 0
+            elif device == "mps":
+                pipeline_device = "mps"
+            else:
+                pipeline_device = -1
+            self._pipe = pipeline("summarization", model=self.model_name, device=pipeline_device)
 
     def _run(self, payload: Any) -> str:
         text = str(payload).strip()

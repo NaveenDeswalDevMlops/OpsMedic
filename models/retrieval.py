@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from models.base import BaseSubTask
+from models.base import BaseSubTask, resolve_device
 from src import config
 
 SNIPPET_CHARS = 300  # description preview length in results
@@ -80,7 +80,7 @@ class RetrievalTask(BaseSubTask):
             )
         self._index = faiss.read_index(index_path)
         self._meta_rows = pd.read_csv(meta_path).to_dict(orient="records")
-        self._encoder = SentenceTransformer(self.model_name)
+        self._encoder = SentenceTransformer(self.model_name, device=resolve_device())
 
     # -- execution --------------------------------------------------------
     def _run(self, payload: Any) -> list[dict[str, Any]]:

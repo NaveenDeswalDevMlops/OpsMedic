@@ -48,14 +48,17 @@ EMBEDDING_MODEL: str = os.getenv(
 )
 SUMMARIZER_MODEL: str = os.getenv("SUMMARIZER_MODEL", "sshleifer/distilbart-cnn-12-6")
 CLASSIFIER_BASE_MODEL: str = os.getenv(
-    "CLASSIFIER_BASE_MODEL", "distilbert-base-uncased"
+    "CLASSIFIER_BASE_MODEL", "microsoft/deberta-v3-base"
 )
 CLASSIFIER_FINETUNED_DIR: str = os.getenv(
-    "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/distilbert-tickets"
+    "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/deberta-v3-base-tickets"
 )
 # Speech Recognition category
-ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-tiny")
-TTS_MODEL: str = os.getenv("TTS_MODEL", "facebook/mms-tts-eng")
+ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-large")
+TTS_MODEL: str = os.getenv("TTS_MODEL", "espnet/kan-bayashi_ljspeech_vits")
+KOKORO_VOICE: str = os.getenv("KOKORO_VOICE", "bf_emma")
+KOKORO_LANG: str = os.getenv("KOKORO_LANG", "b")
+KOKORO_SPEED: float = float(os.getenv("KOKORO_SPEED", "1.0"))
 
 # --- Data: Customer IT Support ticket dataset (with resolutions) ----
 # Citation: T. Bueck, "Customer Support Tickets", Hugging Face.

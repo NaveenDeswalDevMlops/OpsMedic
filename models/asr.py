@@ -5,9 +5,7 @@ An engineer/user records the incident by voice (Streamlit mic input or
 an uploaded audio file); Whisper transcribes it into the incident text
 that feeds the rest of the pipeline.
 
-Model: openai/whisper-tiny (39M params). Chosen for: fully local,
-CPU real-time transcription, robust to accents; whisper-small is a
-one-line upgrade on GPU machines.
+Model: openai/whisper-large. Chosen for stronger transcription quality on GPU machines; whisper-tiny is still available for low-resource local CPU use.
 """
 from __future__ import annotations
 
@@ -15,7 +13,7 @@ from typing import Any
 
 import numpy as np
 
-from models.base import BaseSubTask
+from models.base import BaseSubTask, resolve_device
 from src import config
 
 TARGET_SR = 16_000  # Whisper's expected sampling rate
@@ -47,10 +45,20 @@ class ASRTask(BaseSubTask):
         if self._pipe is None:
             from transformers import pipeline  # lazy heavy import
 
+            device = resolve_device()
+            pipeline_device: int | str
+            if device == "cuda":
+                pipeline_device = 0
+            elif device == "mps":
+                pipeline_device = "mps"
+            else:
+                pipeline_device = -1
+
             self._pipe = pipeline(
                 "automatic-speech-recognition",
                 model=self.model_name,
                 chunk_length_s=30,
+                device=pipeline_device,
             )
 
     def _run(self, payload: Any) -> str:

@@ -1,0 +1,801 @@
+ticket_id,title,description,category,priority,resolution_steps,resolved_date
+OPM-0001,Slow network in Bengaluru office,Users at Bengaluru site report very slow file transfers and video calls dropping since morning. Approx 6 users affected.,Network,P1,"1. Check WAN link utilisation on the Bengaluru edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-01-31
+OPM-0002,Account locked after failed logins,User s.khan locked out of AD account after multiple failed password attempts on Windows 11. Needs urgent access for HR work.,Access,P3,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2025-03-08
+OPM-0003,Printer AST-5521 not printing,Shared printer AST-5521 on floor 40 shows jobs queued but nothing prints; panel displays no error.,Hardware,P3,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-05-07
+OPM-0004,Tableau crashes on startup,"After the latest update, Tableau crashes immediately on launch for user in Procurement on macOS 14. Event viewer shows faulting module.",Software,P3,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2025-01-24
+OPM-0005,Slow queries on HRMSDB since morning,Application team reports SAP GUI timeouts; DB HRMSDB CPU at high utilisation. A deployment happened last night.,Database,P3,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2024-06-16
+OPM-0006,Endpoint flagged with malware on Windows 10,AV console flags trojan on Sales user's machine PRN-104; device auto-isolated from network.,Security,P3,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-08-05
+OPM-0007,Cannot reach internal portal SAP GUI,"Multiple users report SAP GUI unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-20.",Network,P2,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-20 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2024-08-12
+OPM-0008,MFA token not received,User m.das does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P4,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2025-04-24
+OPM-0009,Printer AST-5521 not printing,Shared printer AST-5521 on floor 12 shows jobs queued but nothing prints; panel displays no error.,Hardware,P1,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2025-04-09
+OPM-0010,Email stuck in Outbox,User on macOS 14 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 6 GB.,Software,P3,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2024-11-27
+OPM-0011,Nightly job failed on ORDERSDB database,The ETL batch job on ORDERSDB failed at step LOAD with deadlock error. Downstream Expensify reports are stale this morning.,Database,P3,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Expensify report freshness with data team.",2024-05-11
+OPM-0012,Suspicious login alert for m.das,SIEM alert: impossible-travel login for m.das — office login followed by foreign-country login within minutes.,Security,P2,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-05-03
+OPM-0013,VPN connection drops for Finance user,User in Finance reports VPN disconnects every few minutes on macOS 14. Error shown: gateway timeout. Home ISP is Airtel.,Network,P1,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2024-03-10
+OPM-0014,Access request for CRM denied,User v.rao from Finance cannot open CRM; gets 403 Forbidden although manager approved access last week.,Access,P2,"1. Check user's AD group membership against CRM access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2025-02-20
+OPM-0015,Laptop not powering on,Finance user's Dell Latitude laptop shows no power light; was working yesterday. Charger LED is blinking.,Hardware,P1,"1. Try a known-good charger and power outlet.
+2. Perform hard reset: hold power 30 seconds without battery/AC.
+3. If still dead, book replacement device from stock.
+4. Raise RMA with vendor for the faulty unit.",2024-12-13
+OPM-0016,Expensify crashes on startup,"After the latest update, Expensify crashes immediately on launch for user in HR on Windows 10. Event viewer shows faulting module.",Software,P4,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-02-21
+OPM-0017,Nightly job failed on CRMDB database,The ETL batch job on CRMDB failed at step LOAD with deadlock error. Downstream Confluence reports are stale this morning.,Database,P3,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Confluence report freshness with data team.",2025-02-03
+OPM-0018,Endpoint flagged with malware on Ubuntu 22.04,AV console flags trojan on Sales user's machine PRN-104; device auto-isolated from network.,Security,P4,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-02-21
+OPM-0019,Cannot reach internal portal Tableau,"Multiple users report Tableau unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-20.",Network,P4,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-20 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2024-09-09
+OPM-0020,MFA token not received,User v.rao does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P3,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2024-09-28
+OPM-0021,Laptop not powering on,Legal user's Dell Latitude laptop shows no power light; was working yesterday. Charger LED is on.,Hardware,P1,"1. Try a known-good charger and power outlet.
+2. Perform hard reset: hold power 30 seconds without battery/AC.
+3. If still dead, book replacement device from stock.
+4. Raise RMA with vendor for the faulty unit.",2024-12-23
+OPM-0022,Confluence crashes on startup,"After the latest update, Confluence crashes immediately on launch for user in Sales on macOS 14. Event viewer shows faulting module.",Software,P1,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-09-27
+OPM-0023,Nightly job failed on CRMDB database,The ETL batch job on CRMDB failed at step LOAD with deadlock error. Downstream SAP GUI reports are stale this morning.,Database,P1,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream SAP GUI report freshness with data team.",2024-02-22
+OPM-0024,Suspicious login alert for m.das,SIEM alert: impossible-travel login for m.das — office login followed by foreign-country login within minutes.,Security,P1,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-04-24
+OPM-0025,Slow network in Bengaluru office,Users at Bengaluru site report very slow file transfers and video calls dropping since morning. Approx 6 users affected.,Network,P2,"1. Check WAN link utilisation on the Bengaluru edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2025-01-01
+OPM-0026,MFA token not received,User m.das does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P2,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2024-01-26
+OPM-0027,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model Dell Latitude.,Hardware,P3,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2024-12-24
+OPM-0028,Confluence crashes on startup,"After the latest update, Confluence crashes immediately on launch for user in HR on Windows 11. Event viewer shows faulting module.",Software,P3,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-04-28
+OPM-0029,Nightly job failed on CRMDB database,The ETL batch job on CRMDB failed at step LOAD with deadlock error. Downstream Timesheet reports are stale this morning.,Database,P1,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Timesheet report freshness with data team.",2024-09-17
+OPM-0030,Suspicious login alert for m.das,SIEM alert: impossible-travel login for m.das — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2025-06-03
+OPM-0031,Slow network in Noida office,Users at Noida site report very slow file transfers and video calls dropping since morning. Approx 25 users affected.,Network,P4,"1. Check WAN link utilisation on the Noida edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2025-02-19
+OPM-0032,Account locked after failed logins,User m.das locked out of AD account after multiple failed password attempts on macOS 14. Needs urgent access for Sales work.,Access,P3,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2025-06-07
+OPM-0033,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model Dell Latitude.,Hardware,P1,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2024-05-30
+OPM-0034,Confluence crashes on startup,"After the latest update, Confluence crashes immediately on launch for user in HR on Ubuntu 22.04. Event viewer shows faulting module.",Software,P1,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-01-06
+OPM-0035,Slow queries on FINDB since morning,Application team reports Timesheet timeouts; DB FINDB CPU at high utilisation. A deployment happened last night.,Database,P3,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2025-05-31
+OPM-0036,Suspicious login alert for m.das,SIEM alert: impossible-travel login for m.das — office login followed by foreign-country login within minutes.,Security,P1,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2025-03-26
+OPM-0037,Slow network in Noida office,Users at Noida site report very slow file transfers and video calls dropping since morning. Approx 12 users affected.,Network,P1,"1. Check WAN link utilisation on the Noida edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-08-07
+OPM-0038,Access request for Confluence denied,User s.khan from Engineering cannot open Confluence; gets 403 Forbidden although manager approved access last week.,Access,P3,"1. Check user's AD group membership against Confluence access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-01-07
+OPM-0039,Printer AST-7310 not printing,Shared printer AST-7310 on floor 40 shows jobs queued but nothing prints; panel displays no error.,Hardware,P3,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-06-18
+OPM-0040,Tableau crashes on startup,"After the latest update, Tableau crashes immediately on launch for user in Procurement on Windows 11. Event viewer shows faulting module.",Software,P3,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-09-23
+OPM-0041,Slow queries on ORDERSDB since morning,Application team reports SAP GUI timeouts; DB ORDERSDB CPU at high utilisation. A deployment happened last night.,Database,P2,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2024-12-24
+OPM-0042,Suspicious login alert for v.rao,SIEM alert: impossible-travel login for v.rao — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-08-11
+OPM-0043,Slow network in Delhi office,Users at Delhi site report very slow file transfers and video calls dropping since morning. Approx 40 users affected.,Network,P2,"1. Check WAN link utilisation on the Delhi edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2025-02-10
+OPM-0044,Account locked after failed logins,User a.sharma locked out of AD account after multiple failed password attempts on Windows 10. Needs urgent access for Procurement work.,Access,P3,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2025-06-02
+OPM-0045,Laptop not powering on,Engineering user's Lenovo ThinkPad laptop shows no power light; was working yesterday. Charger LED is off.,Hardware,P3,"1. Try a known-good charger and power outlet.
+2. Perform hard reset: hold power 30 seconds without battery/AC.
+3. If still dead, book replacement device from stock.
+4. Raise RMA with vendor for the faulty unit.",2025-04-21
+OPM-0046,Email stuck in Outbox,User on macOS 14 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 6 GB.,Software,P3,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2025-05-21
+OPM-0047,Nightly job failed on HRMSDB database,The ETL batch job on HRMSDB failed at step LOAD with deadlock error. Downstream SAP GUI reports are stale this morning.,Database,P3,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream SAP GUI report freshness with data team.",2024-09-04
+OPM-0048,Endpoint flagged with malware on Windows 10,AV console flags trojan on Procurement user's machine AST-5521; device auto-isolated from network.,Security,P3,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-09-06
+OPM-0049,Slow network in Hyderabad office,Users at Hyderabad site report very slow file transfers and video calls dropping since morning. Approx 25 users affected.,Network,P2,"1. Check WAN link utilisation on the Hyderabad edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-09-14
+OPM-0050,Account locked after failed logins,User m.das locked out of AD account after multiple failed password attempts on Windows 10. Needs urgent access for Legal work.,Access,P4,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2025-06-21
+OPM-0051,Printer PRN-207 not printing,Shared printer PRN-207 on floor 6 shows jobs queued but nothing prints; panel displays no error.,Hardware,P4,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-02-25
+OPM-0052,License activation failure for Timesheet,User receives 'license server unreachable' when starting Timesheet. Approx 12 users in Legal affected simultaneously.,Software,P3,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2024-02-22
+OPM-0053,Slow queries on FINDB since morning,Application team reports Confluence timeouts; DB FINDB CPU at high utilisation. A deployment happened last night.,Database,P1,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2024-09-11
+OPM-0054,Suspicious login alert for v.rao,SIEM alert: impossible-travel login for v.rao — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-08-04
+OPM-0055,Slow network in Delhi office,Users at Delhi site report very slow file transfers and video calls dropping since morning. Approx 25 users affected.,Network,P2,"1. Check WAN link utilisation on the Delhi edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-02-03
+OPM-0056,Access request for Timesheet denied,User r.gupta from Legal cannot open Timesheet; gets 403 Forbidden although manager approved access last week.,Access,P2,"1. Check user's AD group membership against Timesheet access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-09-29
+OPM-0057,Laptop not powering on,Finance user's MacBook Pro laptop shows no power light; was working yesterday. Charger LED is on.,Hardware,P4,"1. Try a known-good charger and power outlet.
+2. Perform hard reset: hold power 30 seconds without battery/AC.
+3. If still dead, book replacement device from stock.
+4. Raise RMA with vendor for the faulty unit.",2024-10-05
+OPM-0058,Email stuck in Outbox,User on Ubuntu 22.04 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 6 GB.,Software,P4,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2024-08-22
+OPM-0059,Database CRMDB storage almost full,Monitoring alert: data volume for CRMDB at 92% capacity and growing ~40 GB per day.,Database,P3,"1. Purge/archive per data-retention policy with app-team sign-off.
+2. Shrink transaction log after log backup if applicable.
+3. Extend the volume via storage change request.
+4. Set early-warning alert at 80% to avoid recurrence.",2024-04-03
+OPM-0060,Endpoint flagged with malware on macOS 14,AV console flags trojan on Engineering user's machine AST-7310; device auto-isolated from network.,Security,P3,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-02-07
+OPM-0061,VPN connection drops for Sales user,User in Sales reports VPN disconnects every few minutes on macOS 14. Error shown: gateway timeout. Home ISP is ACT.,Network,P3,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2025-05-25
+OPM-0062,Account locked after failed logins,User a.sharma locked out of AD account after multiple failed password attempts on macOS 14. Needs urgent access for HR work.,Access,P4,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2024-01-15
+OPM-0063,Printer AST-5521 not printing,Shared printer AST-5521 on floor 40 shows jobs queued but nothing prints; panel displays no error.,Hardware,P2,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2025-04-28
+OPM-0064,License activation failure for Expensify,User receives 'license server unreachable' when starting Expensify. Approx 25 users in Procurement affected simultaneously.,Software,P3,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2025-06-03
+OPM-0065,Nightly job failed on CRMDB database,The ETL batch job on CRMDB failed at step LOAD with deadlock error. Downstream Expensify reports are stale this morning.,Database,P2,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Expensify report freshness with data team.",2024-07-12
+OPM-0066,Suspicious login alert for m.das,SIEM alert: impossible-travel login for m.das — office login followed by foreign-country login within minutes.,Security,P4,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-05-09
+OPM-0067,Slow network in Pune office,Users at Pune site report very slow file transfers and video calls dropping since morning. Approx 40 users affected.,Network,P3,"1. Check WAN link utilisation on the Pune edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-09-28
+OPM-0068,MFA token not received,User s.khan does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P3,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2024-08-28
+OPM-0069,Laptop not powering on,Legal user's Lenovo ThinkPad laptop shows no power light; was working yesterday. Charger LED is blinking.,Hardware,P1,"1. Try a known-good charger and power outlet.
+2. Perform hard reset: hold power 30 seconds without battery/AC.
+3. If still dead, book replacement device from stock.
+4. Raise RMA with vendor for the faulty unit.",2024-11-28
+OPM-0070,License activation failure for Expensify,User receives 'license server unreachable' when starting Expensify. Approx 40 users in Sales affected simultaneously.,Software,P3,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2024-09-03
+OPM-0071,Database HRMSDB storage almost full,Monitoring alert: data volume for HRMSDB at 92% capacity and growing ~6 GB per day.,Database,P3,"1. Purge/archive per data-retention policy with app-team sign-off.
+2. Shrink transaction log after log backup if applicable.
+3. Extend the volume via storage change request.
+4. Set early-warning alert at 80% to avoid recurrence.",2025-03-28
+OPM-0072,Suspicious login alert for s.khan,SIEM alert: impossible-travel login for s.khan — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-10-29
+OPM-0073,VPN connection drops for Legal user,User in Legal reports VPN disconnects every few minutes on Ubuntu 22.04. Error shown: gateway timeout. Home ISP is ACT.,Network,P4,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2024-07-13
+OPM-0074,Access request for CRM denied,User r.gupta from Legal cannot open CRM; gets 403 Forbidden although manager approved access last week.,Access,P3,"1. Check user's AD group membership against CRM access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-10-29
+OPM-0075,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model HP EliteBook.,Hardware,P1,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2024-12-12
+OPM-0076,License activation failure for CRM,User receives 'license server unreachable' when starting CRM. Approx 25 users in Finance affected simultaneously.,Software,P3,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2024-05-06
+OPM-0077,Slow queries on FINDB since morning,Application team reports CRM timeouts; DB FINDB CPU at high utilisation. A deployment happened last night.,Database,P3,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2024-03-05
+OPM-0078,Suspicious login alert for r.gupta,SIEM alert: impossible-travel login for r.gupta — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2025-02-01
+OPM-0079,Cannot reach internal portal Confluence,"Multiple users report Confluence unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-42.",Network,P3,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-42 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2025-03-30
+OPM-0080,Account locked after failed logins,User a.sharma locked out of AD account after multiple failed password attempts on Windows 11. Needs urgent access for Sales work.,Access,P2,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2024-04-03
+OPM-0081,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model Lenovo ThinkPad.,Hardware,P2,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2024-12-02
+OPM-0082,Email stuck in Outbox,User on macOS 14 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 6 GB.,Software,P2,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2025-01-01
+OPM-0083,Database ORDERSDB storage almost full,Monitoring alert: data volume for ORDERSDB at 92% capacity and growing ~40 GB per day.,Database,P3,"1. Purge/archive per data-retention policy with app-team sign-off.
+2. Shrink transaction log after log backup if applicable.
+3. Extend the volume via storage change request.
+4. Set early-warning alert at 80% to avoid recurrence.",2025-04-04
+OPM-0084,Suspicious login alert for a.sharma,SIEM alert: impossible-travel login for a.sharma — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2025-02-15
+OPM-0085,Slow network in Hyderabad office,Users at Hyderabad site report very slow file transfers and video calls dropping since morning. Approx 25 users affected.,Network,P4,"1. Check WAN link utilisation on the Hyderabad edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2025-01-25
+OPM-0086,MFA token not received,User m.das does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P3,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2024-12-13
+OPM-0087,Printer AST-7310 not printing,Shared printer AST-7310 on floor 6 shows jobs queued but nothing prints; panel displays no error.,Hardware,P1,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-03-28
+OPM-0088,License activation failure for Tableau,User receives 'license server unreachable' when starting Tableau. Approx 25 users in Finance affected simultaneously.,Software,P1,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2025-03-09
+OPM-0089,Slow queries on HRMSDB since morning,Application team reports Timesheet timeouts; DB HRMSDB CPU at high utilisation. A deployment happened last night.,Database,P4,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2024-12-24
+OPM-0090,Endpoint flagged with malware on macOS 14,AV console flags trojan on Finance user's machine AST-5521; device auto-isolated from network.,Security,P3,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-10-06
+OPM-0091,Cannot reach internal portal Expensify,"Multiple users report Expensify unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-42.",Network,P3,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-42 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2025-01-20
+OPM-0092,Access request for SAP GUI denied,User v.rao from Sales cannot open SAP GUI; gets 403 Forbidden although manager approved access last week.,Access,P3,"1. Check user's AD group membership against SAP GUI access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-03-24
+OPM-0093,Printer PRN-104 not printing,Shared printer PRN-104 on floor 40 shows jobs queued but nothing prints; panel displays no error.,Hardware,P3,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-04-23
+OPM-0094,Email stuck in Outbox,User on Ubuntu 22.04 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 12 GB.,Software,P3,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2024-05-20
+OPM-0095,Slow queries on FINDB since morning,Application team reports Confluence timeouts; DB FINDB CPU at high utilisation. A deployment happened last night.,Database,P1,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2025-02-10
+OPM-0096,Endpoint flagged with malware on Ubuntu 22.04,AV console flags trojan on Finance user's machine AST-7310; device auto-isolated from network.,Security,P1,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2025-02-18
+OPM-0097,Cannot reach internal portal Timesheet,"Multiple users report Timesheet unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-31.",Network,P3,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-31 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2024-11-13
+OPM-0098,Account locked after failed logins,User v.rao locked out of AD account after multiple failed password attempts on Windows 10. Needs urgent access for Sales work.,Access,P2,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2024-04-15
+OPM-0099,Printer AST-7310 not printing,Shared printer AST-7310 on floor 25 shows jobs queued but nothing prints; panel displays no error.,Hardware,P3,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-06-03
+OPM-0100,SAP GUI crashes on startup,"After the latest update, SAP GUI crashes immediately on launch for user in Engineering on Ubuntu 22.04. Event viewer shows faulting module.",Software,P3,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-02-28
+OPM-0101,Slow queries on FINDB since morning,Application team reports Confluence timeouts; DB FINDB CPU at high utilisation. A deployment happened last night.,Database,P2,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2025-05-28
+OPM-0102,Phishing email reported by Engineering,User m.das reports suspicious email asking to update payroll details via external link. Several colleagues received it too.,Security,P4,"1. Quarantine the message org-wide via mail security console.
+2. Block sender domain and the embedded URL at the gateway.
+3. Check click-through logs; force password reset for clickers.
+4. Send user advisory and log the incident with SecOps.",2025-06-20
+OPM-0103,Slow network in Pune office,Users at Pune site report very slow file transfers and video calls dropping since morning. Approx 25 users affected.,Network,P4,"1. Check WAN link utilisation on the Pune edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-04-06
+OPM-0104,MFA token not received,User p.iyer does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P2,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2025-02-05
+OPM-0105,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model Dell Latitude.,Hardware,P3,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2025-01-06
+OPM-0106,Expensify crashes on startup,"After the latest update, Expensify crashes immediately on launch for user in HR on macOS 14. Event viewer shows faulting module.",Software,P4,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-05-14
+OPM-0107,Slow queries on FINDB since morning,Application team reports CRM timeouts; DB FINDB CPU at high utilisation. A deployment happened last night.,Database,P4,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2025-03-30
+OPM-0108,Endpoint flagged with malware on Ubuntu 22.04,AV console flags trojan on Legal user's machine AST-7310; device auto-isolated from network.,Security,P4,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2025-01-26
+OPM-0109,Slow network in Hyderabad office,Users at Hyderabad site report very slow file transfers and video calls dropping since morning. Approx 25 users affected.,Network,P2,"1. Check WAN link utilisation on the Hyderabad edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-03-26
+OPM-0110,Access request for Timesheet denied,User r.gupta from Engineering cannot open Timesheet; gets 403 Forbidden although manager approved access last week.,Access,P3,"1. Check user's AD group membership against Timesheet access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-08-29
+OPM-0111,Laptop not powering on,Sales user's Lenovo ThinkPad laptop shows no power light; was working yesterday. Charger LED is on.,Hardware,P3,"1. Try a known-good charger and power outlet.
+2. Perform hard reset: hold power 30 seconds without battery/AC.
+3. If still dead, book replacement device from stock.
+4. Raise RMA with vendor for the faulty unit.",2025-04-25
+OPM-0112,Email stuck in Outbox,User on Windows 11 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 25 GB.,Software,P1,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2024-05-04
+OPM-0113,Nightly job failed on HRMSDB database,The ETL batch job on HRMSDB failed at step LOAD with deadlock error. Downstream Timesheet reports are stale this morning.,Database,P1,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Timesheet report freshness with data team.",2025-03-15
+OPM-0114,Suspicious login alert for v.rao,SIEM alert: impossible-travel login for v.rao — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-02-14
+OPM-0115,Cannot reach internal portal Timesheet,"Multiple users report Timesheet unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-31.",Network,P4,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-31 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2024-12-26
+OPM-0116,Access request for CRM denied,User p.iyer from Legal cannot open CRM; gets 403 Forbidden although manager approved access last week.,Access,P1,"1. Check user's AD group membership against CRM access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-07-25
+OPM-0117,Laptop not powering on,Finance user's HP EliteBook laptop shows no power light; was working yesterday. Charger LED is on.,Hardware,P3,"1. Try a known-good charger and power outlet.
+2. Perform hard reset: hold power 30 seconds without battery/AC.
+3. If still dead, book replacement device from stock.
+4. Raise RMA with vendor for the faulty unit.",2024-02-18
+OPM-0118,License activation failure for Confluence,User receives 'license server unreachable' when starting Confluence. Approx 25 users in Finance affected simultaneously.,Software,P3,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2025-06-15
+OPM-0119,Nightly job failed on ORDERSDB database,The ETL batch job on ORDERSDB failed at step LOAD with deadlock error. Downstream Confluence reports are stale this morning.,Database,P3,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Confluence report freshness with data team.",2024-10-29
+OPM-0120,Endpoint flagged with malware on Ubuntu 22.04,AV console flags trojan on Procurement user's machine AST-5521; device auto-isolated from network.,Security,P1,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-02-28
+OPM-0121,Slow network in Bengaluru office,Users at Bengaluru site report very slow file transfers and video calls dropping since morning. Approx 12 users affected.,Network,P2,"1. Check WAN link utilisation on the Bengaluru edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-03-09
+OPM-0122,MFA token not received,User p.iyer does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P4,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2024-05-20
+OPM-0123,Printer AST-7310 not printing,Shared printer AST-7310 on floor 25 shows jobs queued but nothing prints; panel displays no error.,Hardware,P3,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-09-23
+OPM-0124,Expensify crashes on startup,"After the latest update, Expensify crashes immediately on launch for user in Procurement on macOS 14. Event viewer shows faulting module.",Software,P1,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-12-21
+OPM-0125,Database HRMSDB storage almost full,Monitoring alert: data volume for HRMSDB at 92% capacity and growing ~12 GB per day.,Database,P1,"1. Purge/archive per data-retention policy with app-team sign-off.
+2. Shrink transaction log after log backup if applicable.
+3. Extend the volume via storage change request.
+4. Set early-warning alert at 80% to avoid recurrence.",2025-05-20
+OPM-0126,Endpoint flagged with malware on macOS 14,AV console flags trojan on Procurement user's machine AST-7310; device auto-isolated from network.,Security,P4,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2025-02-23
+OPM-0127,VPN connection drops for HR user,User in HR reports VPN disconnects every few minutes on macOS 14. Error shown: gateway timeout. Home ISP is Airtel.,Network,P1,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2025-05-29
+OPM-0128,Account locked after failed logins,User m.das locked out of AD account after multiple failed password attempts on Windows 10. Needs urgent access for Procurement work.,Access,P4,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2024-07-20
+OPM-0129,Printer AST-5521 not printing,Shared printer AST-5521 on floor 6 shows jobs queued but nothing prints; panel displays no error.,Hardware,P1,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-03-24
+OPM-0130,Email stuck in Outbox,User on macOS 14 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 40 GB.,Software,P3,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2024-09-07
+OPM-0131,Slow queries on HRMSDB since morning,Application team reports Expensify timeouts; DB HRMSDB CPU at high utilisation. A deployment happened last night.,Database,P3,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2024-11-22
+OPM-0132,Endpoint flagged with malware on macOS 14,AV console flags trojan on HR user's machine PRN-207; device auto-isolated from network.,Security,P3,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-02-21
+OPM-0133,Cannot reach internal portal Expensify,"Multiple users report Expensify unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-31.",Network,P3,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-31 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2025-05-25
+OPM-0134,Access request for Tableau denied,User p.iyer from Finance cannot open Tableau; gets 403 Forbidden although manager approved access last week.,Access,P3,"1. Check user's AD group membership against Tableau access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2025-04-26
+OPM-0135,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model HP EliteBook.,Hardware,P4,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2025-01-06
+OPM-0136,License activation failure for Tableau,User receives 'license server unreachable' when starting Tableau. Approx 25 users in Finance affected simultaneously.,Software,P4,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2024-12-13
+OPM-0137,Slow queries on CRMDB since morning,Application team reports Tableau timeouts; DB CRMDB CPU at high utilisation. A deployment happened last night.,Database,P4,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2024-06-01
+OPM-0138,Suspicious login alert for m.das,SIEM alert: impossible-travel login for m.das — office login followed by foreign-country login within minutes.,Security,P1,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2025-05-01
+OPM-0139,Cannot reach internal portal Tableau,"Multiple users report Tableau unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-31.",Network,P4,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-31 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2024-06-23
+OPM-0140,MFA token not received,User v.rao does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P2,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2025-03-04
+OPM-0141,Printer PRN-207 not printing,Shared printer PRN-207 on floor 25 shows jobs queued but nothing prints; panel displays no error.,Hardware,P4,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2025-05-04
+OPM-0142,License activation failure for Tableau,User receives 'license server unreachable' when starting Tableau. Approx 12 users in Sales affected simultaneously.,Software,P4,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2024-10-12
+OPM-0143,Slow queries on FINDB since morning,Application team reports CRM timeouts; DB FINDB CPU at high utilisation. A deployment happened last night.,Database,P3,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2025-01-23
+OPM-0144,Endpoint flagged with malware on macOS 14,AV console flags trojan on HR user's machine AST-5521; device auto-isolated from network.,Security,P4,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-07-25
+OPM-0145,Cannot reach internal portal Timesheet,"Multiple users report Timesheet unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-42.",Network,P3,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-42 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2024-04-12
+OPM-0146,Access request for CRM denied,User v.rao from Legal cannot open CRM; gets 403 Forbidden although manager approved access last week.,Access,P3,"1. Check user's AD group membership against CRM access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-10-21
+OPM-0147,Printer AST-7310 not printing,Shared printer AST-7310 on floor 6 shows jobs queued but nothing prints; panel displays no error.,Hardware,P3,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2025-02-10
+OPM-0148,Timesheet crashes on startup,"After the latest update, Timesheet crashes immediately on launch for user in Legal on macOS 14. Event viewer shows faulting module.",Software,P4,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-05-17
+OPM-0149,Slow queries on ORDERSDB since morning,Application team reports SAP GUI timeouts; DB ORDERSDB CPU at high utilisation. A deployment happened last night.,Database,P4,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2024-10-29
+OPM-0150,Suspicious login alert for a.sharma,SIEM alert: impossible-travel login for a.sharma — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2025-05-03
+OPM-0151,VPN connection drops for Finance user,User in Finance reports VPN disconnects every few minutes on macOS 14. Error shown: gateway timeout. Home ISP is BSNL.,Network,P1,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2024-08-29
+OPM-0152,MFA token not received,User m.das does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P2,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2024-08-14
+OPM-0153,Laptop not powering on,Engineering user's MacBook Pro laptop shows no power light; was working yesterday. Charger LED is blinking.,Hardware,P3,"1. Try a known-good charger and power outlet.
+2. Perform hard reset: hold power 30 seconds without battery/AC.
+3. If still dead, book replacement device from stock.
+4. Raise RMA with vendor for the faulty unit.",2025-06-22
+OPM-0154,Email stuck in Outbox,User on macOS 14 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 25 GB.,Software,P3,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2025-06-16
+OPM-0155,Nightly job failed on CRMDB database,The ETL batch job on CRMDB failed at step LOAD with deadlock error. Downstream Timesheet reports are stale this morning.,Database,P3,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Timesheet report freshness with data team.",2025-04-18
+OPM-0156,Suspicious login alert for v.rao,SIEM alert: impossible-travel login for v.rao — office login followed by foreign-country login within minutes.,Security,P1,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-03-02
+OPM-0157,Cannot reach internal portal Expensify,"Multiple users report Expensify unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-20.",Network,P3,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-20 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2024-05-16
+OPM-0158,Account locked after failed logins,User a.sharma locked out of AD account after multiple failed password attempts on Ubuntu 22.04. Needs urgent access for HR work.,Access,P3,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2024-09-10
+OPM-0159,Printer PRN-104 not printing,Shared printer PRN-104 on floor 12 shows jobs queued but nothing prints; panel displays no error.,Hardware,P1,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-03-09
+OPM-0160,Email stuck in Outbox,User on Ubuntu 22.04 reports emails with attachments stay in Outbox; small emails send fine. Mailbox size near 12 GB.,Software,P3,"1. Check attachment size against the send limit.
+2. Archive old mail to bring mailbox under quota.
+3. Recreate the Outlook profile / clear OST cache.
+4. Send test email with attachment and confirm delivery.",2025-05-30
+OPM-0161,Nightly job failed on FINDB database,The ETL batch job on FINDB failed at step LOAD with deadlock error. Downstream Expensify reports are stale this morning.,Database,P3,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Expensify report freshness with data team.",2024-06-28
+OPM-0162,Suspicious login alert for v.rao,SIEM alert: impossible-travel login for v.rao — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-11-03
+OPM-0163,VPN connection drops for Procurement user,User in Procurement reports VPN disconnects every few minutes on Ubuntu 22.04. Error shown: gateway timeout. Home ISP is Jio.,Network,P2,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2025-02-01
+OPM-0164,Access request for Confluence denied,User v.rao from HR cannot open Confluence; gets 403 Forbidden although manager approved access last week.,Access,P2,"1. Check user's AD group membership against Confluence access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-03-15
+OPM-0165,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model Lenovo ThinkPad.,Hardware,P3,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2024-07-28
+OPM-0166,Confluence crashes on startup,"After the latest update, Confluence crashes immediately on launch for user in Procurement on macOS 14. Event viewer shows faulting module.",Software,P1,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2025-04-22
+OPM-0167,Database ORDERSDB storage almost full,Monitoring alert: data volume for ORDERSDB at 92% capacity and growing ~25 GB per day.,Database,P3,"1. Purge/archive per data-retention policy with app-team sign-off.
+2. Shrink transaction log after log backup if applicable.
+3. Extend the volume via storage change request.
+4. Set early-warning alert at 80% to avoid recurrence.",2025-03-03
+OPM-0168,Phishing email reported by HR,User s.khan reports suspicious email asking to update payroll details via external link. Several colleagues received it too.,Security,P3,"1. Quarantine the message org-wide via mail security console.
+2. Block sender domain and the embedded URL at the gateway.
+3. Check click-through logs; force password reset for clickers.
+4. Send user advisory and log the incident with SecOps.",2024-06-21
+OPM-0169,VPN connection drops for HR user,User in HR reports VPN disconnects every few minutes on Ubuntu 22.04. Error shown: gateway timeout. Home ISP is Jio.,Network,P2,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2024-05-20
+OPM-0170,Account locked after failed logins,User r.gupta locked out of AD account after multiple failed password attempts on Windows 10. Needs urgent access for Legal work.,Access,P4,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2024-01-07
+OPM-0171,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model HP EliteBook.,Hardware,P4,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2024-04-08
+OPM-0172,SAP GUI crashes on startup,"After the latest update, SAP GUI crashes immediately on launch for user in HR on Windows 10. Event viewer shows faulting module.",Software,P1,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-11-03
+OPM-0173,Database HRMSDB storage almost full,Monitoring alert: data volume for HRMSDB at 92% capacity and growing ~6 GB per day.,Database,P3,"1. Purge/archive per data-retention policy with app-team sign-off.
+2. Shrink transaction log after log backup if applicable.
+3. Extend the volume via storage change request.
+4. Set early-warning alert at 80% to avoid recurrence.",2025-05-26
+OPM-0174,Suspicious login alert for s.khan,SIEM alert: impossible-travel login for s.khan — office login followed by foreign-country login within minutes.,Security,P3,"1. Disable the account immediately pending verification.
+2. Contact user via phone to verify recent activity.
+3. Reset credentials and revoke active sessions/tokens.
+4. Review mailbox rules and audit logs for tampering.",2024-07-02
+OPM-0175,VPN connection drops for HR user,User in HR reports VPN disconnects every few minutes on Windows 10. Error shown: gateway timeout. Home ISP is BSNL.,Network,P1,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2024-05-23
+OPM-0176,MFA token not received,User a.sharma does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P3,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2024-10-06
+OPM-0177,Printer AST-5521 not printing,Shared printer AST-5521 on floor 6 shows jobs queued but nothing prints; panel displays no error.,Hardware,P3,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-03-25
+OPM-0178,SAP GUI crashes on startup,"After the latest update, SAP GUI crashes immediately on launch for user in Engineering on Windows 10. Event viewer shows faulting module.",Software,P2,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-04-14
+OPM-0179,Nightly job failed on FINDB database,The ETL batch job on FINDB failed at step LOAD with deadlock error. Downstream Tableau reports are stale this morning.,Database,P3,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Tableau report freshness with data team.",2024-11-28
+OPM-0180,Phishing email reported by Sales,User p.iyer reports suspicious email asking to update payroll details via external link. Several colleagues received it too.,Security,P3,"1. Quarantine the message org-wide via mail security console.
+2. Block sender domain and the embedded URL at the gateway.
+3. Check click-through logs; force password reset for clickers.
+4. Send user advisory and log the incident with SecOps.",2024-10-02
+OPM-0181,Cannot reach internal portal Expensify,"Multiple users report Expensify unreachable from office LAN, browser shows DNS_PROBE_FINISHED_NXDOMAIN. Wi-Fi segment VLAN-31.",Network,P3,"1. Verify DNS resolution with nslookup against corporate DNS.
+2. Flush client DNS cache (ipconfig /flushdns).
+3. Check VLAN VLAN-31 DNS forwarder configuration.
+4. Raise change request to correct forwarder entry if wrong.",2024-09-09
+OPM-0182,MFA token not received,User a.sharma does not receive MFA push/SMS on registered device after switching to a new phone. Cannot log in to any SSO app.,Access,P3,"1. Verify identity per policy before any MFA change.
+2. Remove old device registration from the MFA portal.
+3. Guide user through re-enrolling the new device.
+4. Test SSO login to one app and confirm closure.",2024-12-08
+OPM-0183,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model HP EliteBook.,Hardware,P4,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2025-05-17
+OPM-0184,Confluence crashes on startup,"After the latest update, Confluence crashes immediately on launch for user in Sales on Ubuntu 22.04. Event viewer shows faulting module.",Software,P3,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-08-02
+OPM-0185,Slow queries on HRMSDB since morning,Application team reports CRM timeouts; DB HRMSDB CPU at high utilisation. A deployment happened last night.,Database,P1,"1. Identify top queries by CPU/reads since the deployment.
+2. Compare execution plans against pre-deployment baseline.
+3. Update statistics / rebuild the affected index.
+4. If regression confirmed, roll back the offending query change.",2025-01-21
+OPM-0186,Endpoint flagged with malware on Ubuntu 22.04,AV console flags trojan on Procurement user's machine PRN-104; device auto-isolated from network.,Security,P2,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2024-12-29
+OPM-0187,Slow network in Delhi office,Users at Delhi site report very slow file transfers and video calls dropping since morning. Approx 40 users affected.,Network,P3,"1. Check WAN link utilisation on the Delhi edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2025-01-18
+OPM-0188,Access request for Timesheet denied,User r.gupta from Legal cannot open Timesheet; gets 403 Forbidden although manager approved access last week.,Access,P3,"1. Check user's AD group membership against Timesheet access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-11-15
+OPM-0189,Printer PRN-104 not printing,Shared printer PRN-104 on floor 6 shows jobs queued but nothing prints; panel displays no error.,Hardware,P1,"1. Restart the print spooler service on the print server.
+2. Clear stuck jobs from the queue.
+3. Power-cycle the printer and reseat network cable.
+4. Print test page; if failing, swap with spare unit and log RMA.",2024-04-27
+OPM-0190,License activation failure for CRM,User receives 'license server unreachable' when starting CRM. Approx 12 users in Legal affected simultaneously.,Software,P2,"1. Check license server service status and restart if stopped.
+2. Verify license count not exhausted; reclaim idle seats.
+3. Confirm client can reach license server port (telnet test).
+4. Notify affected users and monitor for one business day.",2025-02-18
+OPM-0191,Nightly job failed on CRMDB database,The ETL batch job on CRMDB failed at step LOAD with deadlock error. Downstream Timesheet reports are stale this morning.,Database,P2,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Timesheet report freshness with data team.",2024-08-07
+OPM-0192,Endpoint flagged with malware on Windows 11,AV console flags trojan on Legal user's machine PRN-104; device auto-isolated from network.,Security,P3,"1. Keep device isolated; collect AV detection details.
+2. Run full offline scan and remove the detected threat.
+3. Verify no lateral movement from the endpoint in EDR logs.
+4. Re-image if persistence is suspected; restore user data from backup.",2025-06-24
+OPM-0193,Slow network in Pune office,Users at Pune site report very slow file transfers and video calls dropping since morning. Approx 12 users affected.,Network,P1,"1. Check WAN link utilisation on the Pune edge router.
+2. Identify top talkers; look for backup jobs running in office hours.
+3. Reschedule backup job to off-peak window.
+4. Monitor link for 2 hours and confirm with site contact.",2024-11-16
+OPM-0194,Account locked after failed logins,User v.rao locked out of AD account after multiple failed password attempts on Windows 11. Needs urgent access for Sales work.,Access,P3,"1. Verify user identity per security policy (manager + employee ID).
+2. Unlock account in Active Directory Users and Computers.
+3. Reset password and enforce change at next logon.
+4. Advise on password manager to prevent recurrence.",2024-07-09
+OPM-0195,Docking station display issues,User's external monitors flicker and disconnect when laptop is docked. Direct HDMI to laptop works fine. Dock model HP EliteBook.,Hardware,P2,"1. Update dock firmware and laptop USB-C/Thunderbolt drivers.
+2. Replace the dock's upstream cable with a certified cable.
+3. Test with a known-good dock to isolate the unit.
+4. Replace dock from stock if fault follows the unit.",2025-05-11
+OPM-0196,CRM crashes on startup,"After the latest update, CRM crashes immediately on launch for user in Engineering on Ubuntu 22.04. Event viewer shows faulting module.",Software,P3,"1. Clear the application cache/user profile settings folder.
+2. Repair-install the application from the software portal.
+3. If crash persists, roll back to previous version.
+4. Log a problem record referencing the faulting module for vendor.",2024-08-13
+OPM-0197,Nightly job failed on ORDERSDB database,The ETL batch job on ORDERSDB failed at step LOAD with deadlock error. Downstream Expensify reports are stale this morning.,Database,P4,"1. Check job logs for the deadlocked session and victim query.
+2. Re-run the failed step after confirming no blocking sessions.
+3. Add retry-on-deadlock logic to the job (change request).
+4. Validate downstream Expensify report freshness with data team.",2025-01-10
+OPM-0198,Phishing email reported by Legal,User r.gupta reports suspicious email asking to update payroll details via external link. Several colleagues received it too.,Security,P1,"1. Quarantine the message org-wide via mail security console.
+2. Block sender domain and the embedded URL at the gateway.
+3. Check click-through logs; force password reset for clickers.
+4. Send user advisory and log the incident with SecOps.",2025-03-25
+OPM-0199,VPN connection drops for HR user,User in HR reports VPN disconnects every few minutes on macOS 14. Error shown: gateway timeout. Home ISP is BSNL.,Network,P3,"1. Confirm VPN client version and update if below baseline.
+2. Switch VPN protocol from UDP to TCP in client settings.
+3. Whitelist VPN executable in local firewall/antivirus.
+4. If drops persist, capture client logs and escalate to Network L2.",2024-11-27
+OPM-0200,Access request for Expensify denied,User r.gupta from Procurement cannot open Expensify; gets 403 Forbidden although manager approved access last week.,Access,P2,"1. Check user's AD group membership against Expensify access matrix.
+2. Confirm the approval ticket completed provisioning workflow.
+3. Add user to the correct entitlement group.
+4. Ask user to re-login after 15 minutes; confirm access.",2024-11-25
