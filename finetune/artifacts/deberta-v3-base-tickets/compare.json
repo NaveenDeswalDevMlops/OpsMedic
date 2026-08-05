@@ -1,0 +1,200 @@
+{
+  "base": {
+    "model_source": "microsoft/deberta-v3-base",
+    "eval_rows": 1000,
+    "accuracy": 0.03,
+    "f1_macro": 0.0058,
+    "per_class": {
+      "Billing and Payments": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 98
+      },
+      "Customer Service": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 149
+      },
+      "General Inquiry": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 14
+      },
+      "Human Resources": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 21
+      },
+      "IT Support": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 117
+      },
+      "Product Support": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 190
+      },
+      "Returns and Exchanges": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 50
+      },
+      "Sales and Pre-Sales": {
+        "precision": 0.03,
+        "recall": 1.0,
+        "f1": 0.058,
+        "support": 30
+      },
+      "Service Outages and Maintenance": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 42
+      },
+      "Technical Support": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 289
+      }
+    }
+  },
+  "finetuned": {
+    "model_source": "./finetune/artifacts/deberta-v3-base-tickets",
+    "eval_rows": 1000,
+    "accuracy": 0.098,
+    "f1_macro": 0.0179,
+    "per_class": {
+      "Billing and Payments": {
+        "precision": 0.098,
+        "recall": 1.0,
+        "f1": 0.179,
+        "support": 98
+      },
+      "Customer Service": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 149
+      },
+      "General Inquiry": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 14
+      },
+      "Human Resources": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 21
+      },
+      "IT Support": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 117
+      },
+      "Product Support": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 190
+      },
+      "Returns and Exchanges": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 50
+      },
+      "Sales and Pre-Sales": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 30
+      },
+      "Service Outages and Maintenance": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 42
+      },
+      "Technical Support": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 289
+      }
+    }
+  },
+  "samples": [
+    {
+      "text": "Data Delay Issue Encountered Today. The analytics platform faced sporadic data delays, likely due to server overload or network connectivity",
+      "true": "Technical Support",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Digital Service Disruptions Reported Today. The marketing agency encountered digital service interruptions impacting several products, proba",
+      "true": "Service Outages and Maintenance",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Assistance Needed with Billing Inquiries. Could you kindly provide information regarding the billing choices for Smartsheet and Google Nest ",
+      "true": "Billing and Payments",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Immediate Update Required for Security Protocols. Dear Customer Support,\\n\\nI am writing to urgently request the enhancement of our security",
+      "true": "Returns and Exchanges",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Request for Integration of IFTTT with JIRA for Enhanced Automation. Inquiry about integrating IFTTT and JIRA to boost project management and",
+      "true": "General Inquiry",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Enhancing Security for Medical Data in Blackboard Learn. Customer Support, please provide guidance on securing medical data practices relate",
+      "true": "Customer Service",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Alert on Security Incident. Noted unauthorized access attempts occurred",
+      "true": "Human Resources",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Inquiry about Features of Project Management SaaS. Hello, I am reaching out to your customer support team to inquire about the project manag",
+      "true": "Sales and Pre-Sales",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Concerns with Software Update. The software update led to connectivity issues with project tools. Restarting the router resolved the problem",
+      "true": "Product Support",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    },
+    {
+      "text": "Submitted Request for Support. Our project management tools are experiencing a significant outage due to unforeseen compatibility issues fol",
+      "true": "IT Support",
+      "base_pred": "Product Support",
+      "finetuned_pred": "Billing and Payments"
+    }
+  ]
+}

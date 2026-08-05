@@ -1,0 +1,63 @@
+{
+  "architectures": [
+    "DebertaV2ForSequenceClassification"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": null,
+  "dtype": "float16",
+  "eos_token_id": null,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "id2label": {
+    "0": "Billing and Payments",
+    "1": "Customer Service",
+    "2": "General Inquiry",
+    "3": "Human Resources",
+    "4": "IT Support",
+    "5": "Product Support",
+    "6": "Returns and Exchanges",
+    "7": "Sales and Pre-Sales",
+    "8": "Service Outages and Maintenance",
+    "9": "Technical Support"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "label2id": {
+    "Billing and Payments": 0,
+    "Customer Service": 1,
+    "General Inquiry": 2,
+    "Human Resources": 3,
+    "IT Support": 4,
+    "Product Support": 5,
+    "Returns and Exchanges": 6,
+    "Sales and Pre-Sales": 7,
+    "Service Outages and Maintenance": 8,
+    "Technical Support": 9
+  },
+  "layer_norm_eps": 1e-07,
+  "legacy": true,
+  "max_position_embeddings": 512,
+  "max_relative_positions": -1,
+  "model_type": "deberta-v2",
+  "norm_rel_ebd": "layer_norm",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_dropout": 0.0,
+  "pooler_hidden_act": "gelu",
+  "pooler_hidden_size": 768,
+  "pos_att_type": [
+    "p2c",
+    "c2p"
+  ],
+  "position_biased_input": false,
+  "position_buckets": 256,
+  "relative_attention": true,
+  "share_att_key": true,
+  "tie_word_embeddings": true,
+  "transformers_version": "5.14.1",
+  "type_vocab_size": 0,
+  "use_cache": false,
+  "vocab_size": 128100
+}
