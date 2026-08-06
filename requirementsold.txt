@@ -5,41 +5,41 @@
 # On Windows without a GPU, torch installs the CPU wheel automatically.
 
 # --- UI ---
-streamlit==1.40.1  # >=1.39 required for st.audio_input (mic widget)
+streamlit  # >=1.39 required for st.audio_input (mic widget)
 
 # --- NLP / Speech models (Hugging Face, all free) ---
-transformers==4.44.2
-torch==2.4.1
-# NOTE: torchvision is NOT used by OpsMedic. If a shared venv already
-# contains a torchvision built for another torch version you will see
-# "operator torchvision::nms does not exist" on import. Either
-# `pip uninstall torchvision -y`, or pin the matching build:
-# torchvision==0.19.1
-sentence-transformers==3.0.1
-faiss-cpu==1.8.0.post1
-datasets==2.21.0
-accelerate==0.34.2
+transformers
+torch
+# NOTE: torchvision is required by some Transformers image-processing
+# modules that Streamlit may inspect during startup.
+# Use the matching build for the installed torch version.
+torchvision==0.19.1
+sentence-transformers
+faiss-cpu
+datasets
+accelerate
 
 # --- Audio I/O for ASR (Whisper) and TTS playback ---
-soundfile==0.12.1
-librosa==0.10.2.post1
+soundfile
+librosa
 
 # --- Data / classic ML (fine-tune evaluation) ---
-pandas==2.2.2
-numpy==1.26.4
-scikit-learn==1.5.1
+pandas
+numpy
+scikit-learn
 
 # --- LLM API (Groq, OpenAI-compatible REST) + env ---
-requests==2.32.3
-plotly==5.24.1
-pypdf==4.3.1
-psutil==6.0.0
-python-dotenv==1.0.1
+requests
+plotly
+pypdf
+psutil
+python-dotenv
 
 # --- Tests ---
-pytest==8.3.2
+pytest
 # beautifulsoup4 ships soupsieve, the CSS engine used by
 # tests/test_theme_selectors_offline.py to run the composer's :has()
 # selectors against a replica of Streamlit's DOM. Test-only, pure Python;
 # that suite skips itself if this is missing, so the app never needs it.
-beautifulsoup4==4.12.3
+beautifulsoup4
+
