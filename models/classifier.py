@@ -41,6 +41,13 @@ DEFAULT_LABELS = [
 ]
 MAX_INPUT_CHARS = 2000
 
+#: Softmax confidence below which a queue prediction is treated as
+#: "needs human triage" rather than acted on automatically. Chance for
+#: this 10-class problem is 0.10 and the fine-tuned model scores 0.357
+#: accuracy on held-out data, so anything under half is a coin flip
+#: dressed up as an answer. Tune with OPSMEDIC_LOW_CONF if needed.
+LOW_CONFIDENCE_FLOOR = float(os.getenv("OPSMEDIC_LOW_CONF", "0.50"))
+
 
 def resolve_labels() -> list[str]:
     """Determine the label list (sorted for a stable id<->label mapping).
@@ -150,8 +157,18 @@ class ClassifierTask(BaseSubTask):
             raise ValueError("empty text")
         self._ensure_loaded()
         pred = self._pipe(text[:MAX_INPUT_CHARS], truncation=True)[0]
+        confidence = round(float(pred["score"]), 4)
+        # Confidence drives the escalate-to-human path: a low-confidence
+        # queue guess is worse than no guess, because it routes the
+        # ticket to the wrong team and restarts the clock.
+        self.report_signals(
+            classifier_confidence=confidence,
+            low_confidence=confidence < LOW_CONFIDENCE_FLOOR,
+            predicted_label=pred["label"],
+            classifier_variant=self.variant,
+        )
         return {
             "label": pred["label"],
-            "confidence": round(float(pred["score"]), 4),
+            "confidence": confidence,
             "variant": self.variant,
         }

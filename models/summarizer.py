@@ -53,4 +53,15 @@ class SummarizerTask(BaseSubTask):
             do_sample=False,
             truncation=True,
         )
-        return result[0]["summary_text"].strip()
+        summary = result[0]["summary_text"].strip()
+        # Compression ratio is the point of this sub-task: a shift
+        # handover note that is 90% of the original length has failed
+        # even if it reads well.
+        self.report_signals(
+            compression_ratio=(
+                round(len(summary) / len(text), 4) if text else None
+            ),
+            input_chars=len(text),
+            summary_chars=len(summary),
+        )
+        return summary

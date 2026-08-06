@@ -268,6 +268,7 @@ class ResolutionTask(BaseSubTask):
         start = _time.perf_counter()
         collected: list[str] = []
         tokens_in = tokens_out = 0
+        ttft_ms: float | None = None  # time to first content token
         status, error_text = "ok", None
         try:
             with requests.post(
@@ -305,6 +306,8 @@ class ResolutionTask(BaseSubTask):
                     for choice in chunk.get("choices", []):
                         piece = (choice.get("delta") or {}).get("content")
                         if piece:
+                            if ttft_ms is None:
+                                ttft_ms = (_time.perf_counter() - start) * 1000.0
                             collected.append(piece)
                             yield piece
         except Exception as exc:  # noqa: BLE001
@@ -312,18 +315,36 @@ class ResolutionTask(BaseSubTask):
             yield f"\n\n_(streaming error: {error_text})_"
         finally:
             full = "".join(collected)
-            latency_ms = (_time.perf_counter() - start) * 1000.0  # noqa: F841
+            latency_ms = (_time.perf_counter() - start) * 1000.0
             # write exactly one metrics row for the whole streamed call
             with self.metrics.track(self.name, self.model_name) as trk:
+                # The generator is already drained, so track() would time
+                # an empty block and record ~0 ms. Inject the real
+                # elapsed time measured across the whole stream.
+                trk.set_latency_ms(latency_ms)
                 if tokens_in or tokens_out:
                     trk.set_tokens(tokens_in=tokens_in, tokens_out=tokens_out)
                 else:
                     trk.estimate_tokens(str(payload), full)
-                trk.add_extra(streamed=True,
-                              prompt_version=prompt_version_for(style),
-                              style=style)
+                tokens_total = tokens_out or trk.tokens_out
+                grounded_ids = [t["ticket_id"] for t in similar[:MAX_SIMILAR]]
+                cited = [tid for tid in grounded_ids if str(tid) in full]
+                trk.add_extra(
+                    streamed=True,
+                    prompt_version=prompt_version_for(style),
+                    style=style,
+                    ttft_ms=round(ttft_ms, 1) if ttft_ms else None,
+                    tokens_per_sec=(
+                        round(tokens_total / (latency_ms / 1000.0), 2)
+                        if latency_ms > 0 and tokens_total else None
+                    ),
+                    evidence_count=len(grounded_ids),
+                    citations_found=len(cited),
+                    grounded=bool(cited),
+                )
                 if error_text:
-                    trk.add_extra(error=error_text)
+                    # status must flip too, or the error-rate metric lies.
+                    trk.mark_error(error_text)
             if status == "ok" and full and self.cache is not None and self.cacheable:
                 self.cache.set(
                     self.name,

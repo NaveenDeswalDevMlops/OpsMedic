@@ -9,6 +9,8 @@ Model: openai/whisper-large. Chosen for stronger transcription quality on GPU ma
 """
 from __future__ import annotations
 
+import time as _time
+
 from typing import Any
 
 import numpy as np
@@ -74,8 +76,23 @@ class ASRTask(BaseSubTask):
             audio = to_mono_16k(data, sr)
         if audio.size < TARGET_SR // 4:  # < 0.25 s
             raise ValueError("audio too short to transcribe")
+        audio_s = audio.size / TARGET_SR
+        t0 = _time.perf_counter()
         result = self._pipe(
             {"array": audio, "sampling_rate": TARGET_SR},
             generate_kwargs={"language": "english", "task": "transcribe"},
         )
-        return str(result["text"]).strip()
+        decode_s = _time.perf_counter() - t0
+        transcript = str(result["text"]).strip()
+        # Real-time factor is the standard ASR efficiency metric:
+        # decode time divided by audio duration. RTF < 1 means faster
+        # than real time. whisper-large on CPU sits far above 1, which
+        # is a deliberate accuracy-for-speed trade we report rather
+        # than hide.
+        self.report_signals(
+            asr_audio_s=round(audio_s, 3),
+            asr_decode_s=round(decode_s, 3),
+            asr_rtf=round(decode_s / audio_s, 3) if audio_s > 0 else None,
+            asr_chars=len(transcript),
+        )
+        return transcript

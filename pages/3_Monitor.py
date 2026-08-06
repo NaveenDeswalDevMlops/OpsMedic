@@ -1,7 +1,8 @@
 # pages/3_Monitor.py
-"""OpsMedic /monitor — enterprise LLM-Ops console (7 tabs).
+"""OpsMedic /monitor — enterprise LLM-Ops console (9 tabs).
 
-Overview · LLM Gateway · Model Monitoring · Fine-tune · System Health ·
+Overview · Golden Signals · LLM Gateway · Model Monitoring · Metrics ·
+Fine-tune · System Health ·
 Request Logs · App Details. Reuses the reference dashboard's visual
 language (KPI tiles, Plotly donut gauges, status badges) over
 OpsMedic's live SQLite metrics store — no MLflow/Prefect needed.
@@ -27,6 +28,7 @@ from llmops.metrics import MetricsLogger
 from llmops.system_stats import db_file_sizes, system_stats
 from src import config
 from ui import nav, theme
+from ui import golden_signals, metrics_dashboard, model_card_panel
 
 st.set_page_config(page_title="OpsMedic · Monitor", page_icon="📡", layout="wide")
 theme.inject_css()
@@ -44,9 +46,17 @@ with st.sidebar:
         st.rerun()
 
 page_tabs = st.tabs([
-    "Overview", "LLM Gateway", "Model Monitoring", "Fine-tune",
-    "System Health", "Request Logs", "App Details",
+    "Overview", "Golden Signals", "LLM Gateway", "Model Monitoring",
+    "Metrics", "Fine-tune", "System Health", "Request Logs", "App Details",
 ])
+# Metrics and Fine-tune used to be separate sidebar pages
+# (1_LLMOps_Dashboard.py and 2_Model_Card.py). They are tabs now so
+# everything operational lives on one page; their bodies moved to
+# ui/metrics_dashboard.py and ui/model_card_panel.py.
+# NOTE: the old "Fine-tune" tab was removed - it duplicated
+# pages/2_Model_Card.py, which owns model evaluation. This page answers
+# "is it healthy right now?"; the Model Card answers "can I trust this
+# model?". See the Monitor / Experiments / Model Card split in the report.
 
 # ============================================================ OVERVIEW
 with page_tabs[0]:
@@ -113,6 +123,9 @@ with page_tabs[0]:
 
 # ========================================================= LLM GATEWAY
 with page_tabs[1]:
+    golden_signals.render(logger)
+
+with page_tabs[2]:
     theme.page_header(
         "LLM Gateway", "Model call metrics",
         "Per-sub-task and per-model latency, tokens, cost and errors — "
@@ -164,7 +177,7 @@ with page_tabs[1]:
             st.dataframe(model_roll, use_container_width=True, hide_index=True)
 
 # ==================================================== MODEL MONITORING
-with page_tabs[2]:
+with page_tabs[3]:
     theme.page_header(
         "Model Monitoring", "Quality, drift & feedback",
         "Latency trend, request volume, and user-feedback signal over time.",
@@ -221,63 +234,13 @@ with page_tabs[2]:
         )
 
 # ============================================================ FINE-TUNE
-with page_tabs[3]:
-    theme.page_header(
-        "Fine-tuning", "Base vs fine-tuned DistilBERT",
-        "The before/after evidence, rendered from compare.json.",
-    )
-    paths = default_paths()
-    if not os.path.isfile(paths["compare_json"]):
-        st.warning("Run `python finetune/train.py` then "
-                   "`python finetune/compare.py`.")
-    else:
-        with open(paths["compare_json"], encoding="utf-8") as fh:
-            compare = json.load(fh)
-        head = pd.DataFrame(headline_delta(compare))
-        hc = st.columns([2, 3])
-        with hc[0]:
-            for _, r in head.iterrows():
-                theme.tile(
-                    "🎯", r["metric"],
-                    f"{r['base']:.3f} → {r['finetuned']:.3f}",
-                    badge_html=theme.status_badge(f"+{r['delta']:.3f}", "ok"))
-                st.write("")
-        with hc[1]:
-            melted = head.melt(id_vars="metric", value_vars=["base", "finetuned"])
-            fig = px.bar(melted, x="metric", y="value", color="variable",
-                         barmode="group", title="Base vs fine-tuned")
-            theme.style_plotly(fig)
-            st.plotly_chart(fig, use_container_width=True)
-
-        pc = pd.DataFrame(per_class_table(compare, "finetuned"))
-        if not pc.empty:
-            fig2 = px.bar(pc, x="class", y="f1", title="Per-class F1 (fine-tuned)",
-                          color="f1", color_continuous_scale="Blues")
-            theme.style_plotly(fig2)
-            st.plotly_chart(fig2, use_container_width=True)
-
-        if os.path.isfile(paths["training_log"]):
-            with open(paths["training_log"], encoding="utf-8") as fh:
-                tlog = json.load(fh)
-            curves = training_curves(tlog.get("log_history", []))
-            tcc = st.columns(2)
-            if curves["train"]:
-                tdf = pd.DataFrame(curves["train"], columns=["epoch", "loss"])
-                fig3 = px.line(tdf, x="epoch", y="loss", title="Training loss",
-                               markers=True)
-                theme.style_plotly(fig3)
-                tcc[0].plotly_chart(fig3, use_container_width=True)
-            if curves["eval"]:
-                edf = pd.DataFrame(curves["eval"],
-                                   columns=["epoch", "accuracy", "f1_macro",
-                                            "eval_loss"])
-                fig4 = px.line(edf, x="epoch", y=["accuracy", "f1_macro"],
-                               title="Held-out accuracy / macro-F1", markers=True)
-                theme.style_plotly(fig4)
-                tcc[1].plotly_chart(fig4, use_container_width=True)
-
-# ========================================================= SYSTEM HEALTH
 with page_tabs[4]:
+    metrics_dashboard.render(logger)
+
+with page_tabs[5]:
+    model_card_panel.render()
+
+with page_tabs[6]:
     theme.page_header(
         "System Health", "Host resources & data stores",
         "Local runtime stats and the sizes of the metrics/cache stores.",
@@ -313,7 +276,7 @@ with page_tabs[4]:
     st.dataframe(pd.DataFrame(sizes), use_container_width=True, hide_index=True)
 
 # ========================================================= REQUEST LOGS
-with page_tabs[5]:
+with page_tabs[7]:
     theme.page_header(
         "Request Logs", "Raw metric rows",
         "Every metered call, newest first — filterable stream.",
@@ -346,7 +309,7 @@ with page_tabs[5]:
                    "Fine-tuned classifier rows carry an @timestamp model version.")
 
 # ========================================================== APP DETAILS
-with page_tabs[6]:
+with page_tabs[8]:
     theme.page_header(
         "Application Details", "Configuration & stack",
         "What this deployment is running.",

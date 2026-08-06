@@ -100,14 +100,16 @@ section[data-testid="stSidebar"] div[data-testid="stSidebarNav"] {{ display: non
 .opm-nav-active .stButton>button {{ border-color:{PRIMARY} !important;
     background: rgba(59,130,246,.08) !important; }}
 
-/* "New chat" pill styled like the reference "Chat with AI" button */
-.opm-newchat button {{
+/* Primary-action pill. Was the "+ New chat" button; that button is gone
+   (the Chat nav entry starts a new conversation), so this rule is kept
+   only for the active Workspace nav button, which reuses the styling. */
+.opm-nav-active button {{
     border: 2px solid {DEEPBLUE} !important; color: {DEEPBLUE} !important;
     background: #fff !important; border-radius: 20px !important;
     font-weight: 700 !important; text-align: center !important;
     padding: 6px 14px !important;
 }}
-.opm-newchat button:hover {{ background: rgba(2,2,139,.05) !important; }}
+.opm-nav-active button:hover {{ background: rgba(2,2,139,.05) !important; }}
 
 /* profile card at the sidebar bottom */
 .opm-profile {{ background:#fff; border-radius:15px; padding:14px 12px;

@@ -24,19 +24,22 @@ from src import config
 from ui import theme
 
 # label -> page file path for st.page_link
+#
+# Fine-tune and Metrics used to be separate entries here, pointing at
+# pages/2_*.py and pages/1_*.py. They are now tabs on the Monitor page
+# (ui/model_card_panel.py and ui/metrics_dashboard.py), so the sidebar
+# holds only the two genuine destinations: the chat, and everything
+# operational. Streamlit's own page nav is hidden in theme.py, so
+# deleting those page files removed them from the sidebar entirely.
 _PAGES = [
     ("💬  Chat", "app.py"),
     ("📡  Monitor", "pages/3_Monitor.py"),
-    ("🎯  Fine-tune", "pages/2_Finetune_Comparison.py"),
-    ("📊  Metrics", "pages/1_LLMOps_Dashboard.py"),
 ]
 
 #: breadcrumb page name per nav label, so the topbar text is defined once
 _CRUMBS = {
     "💬  Chat": "Ask-AI",
     "📡  Monitor": "Monitor",
-    "🎯  Fine-tune": "Fine-tune",
-    "📊  Metrics": "Metrics",
 }
 
 
@@ -57,18 +60,32 @@ def section_header(label: str, expanded: bool = True) -> Any:
 
 
 def render_workspace_nav(active_label: str, collapsible: bool = True,
-                         expanded: bool = True) -> None:
+                         expanded: bool = True,
+                         on_active_click: Any = None,
+                         active_help: str | None = None) -> None:
     """Workspace buttons. `active_label` is the current page's label so it
-    renders highlighted; the others are page links that navigate away."""
+    renders highlighted; the others are page links that navigate away.
+
+    `on_active_click` is a zero-argument callable invoked when the user
+    clicks the button for the page they are already on. That is what
+    powers "Chat" doubling as the new-chat action: there is no separate
+    "+ New chat" button any more, because clicking the destination you
+    are already at has no other sensible meaning.
+    """
     def _body() -> None:
         for label, target in _PAGES:
             is_active = label == active_label
             wrap = "opm-nav opm-nav-active" if is_active else "opm-nav"
             st.markdown(f'<div class="{wrap}">', unsafe_allow_html=True)
             if is_active:
-                # current page: a non-navigating button (visual highlight only)
-                st.button(label, use_container_width=True,
-                          key=f"navbtn_{label}", disabled=False)
+                # current page: clicking it triggers the page's own
+                # "restart" action if one was supplied, otherwise it is
+                # an inert visual highlight.
+                clicked = st.button(label, use_container_width=True,
+                                    key=f"navbtn_{label}",
+                                    help=active_help)
+                if clicked and callable(on_active_click):
+                    on_active_click()
             else:
                 st.page_link(target, label=label)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -86,7 +103,7 @@ def crumb_for(active_label: str) -> str:
 
 
 def render_sidebar_nav(active_label: str, show_profile: bool = True) -> None:
-    """Sidebar header used on the monitor/finetune/metrics pages.
+    """Sidebar header used on the Monitor page.
 
     The chat app builds its own richer sidebar (with recents); the other
     pages use this so they always have the brand + a Back-to-Chat link.

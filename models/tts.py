@@ -130,7 +130,27 @@ class TTSTask(BaseSubTask):
     def _run(self, payload: Any) -> dict[str, Any]:
         """payload: str, or {"text": str, "out_path": str}.
 
-        Returns {"audio_path", "sampling_rate", "duration_s"}."""
+        Returns {"audio_path", "sampling_rate", "duration_s", "engine",
+        "fallback"}. Wraps _synthesize so that every return path - real
+        VITS, Kokoro, macOS `say` or the tone-stream fallback - reports
+        its engine and degradation flag exactly once.
+        """
+        out = self._synthesize(payload)
+        # tts_fallback is the metric that matters here: on a machine
+        # without the model cached, or without macOS `say`, this
+        # sub-task emits beeps. Silent degradation would let the report
+        # claim VITS synthesis for audio that never touched VITS.
+        self.report_signals(
+            tts_engine=out.get("engine"),
+            tts_fallback=bool(out.get("fallback", False)),
+            tts_duration_s=out.get("duration_s"),
+            tts_sampling_rate=out.get("sampling_rate"),
+            tts_fallback_reason=out.get("fallback_reason"),
+        )
+        return out
+
+    def _synthesize(self, payload: Any) -> dict[str, Any]:
+        """Actual synthesis; see _run for the reported schema."""
         import torch  # lazy
 
         if isinstance(payload, dict):
@@ -160,6 +180,8 @@ class TTSTask(BaseSubTask):
                     "audio_path": out_path,
                     "sampling_rate": sr,
                     "duration_s": round(len(audio) / sr, 2),
+                    "engine": f"kokoro:{config.KOKORO_VOICE}",
+                    "fallback": False,
                 }
 
             inputs = self._tokenizer(text[:MAX_TTS_CHARS], return_tensors="pt")
