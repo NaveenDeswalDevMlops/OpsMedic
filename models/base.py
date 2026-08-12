@@ -21,6 +21,17 @@ from llmops.cache import ResponseCache
 from llmops.metrics import MetricsLogger, approx_tokens
 
 
+def resolve_device() -> str:
+    """Prefer Apple MPS, then CUDA, then CPU for local inference."""
+    import torch
+
+    if getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available():
+        return "mps"
+    if torch.cuda.is_available():
+        return "cuda"
+    return "cpu"
+
+
 class BaseSubTask(ABC):
     #: unique short id, e.g. "retrieve", "resolve", "summarize",
     #: "classify", "asr", "tts"  (set by subclasses)
@@ -41,6 +52,7 @@ class BaseSubTask(ABC):
         self.metrics = metrics or MetricsLogger()
         self.cache = cache
         self._usage: dict[str, int] | None = None
+        self._signals: dict[str, Any] = {}
 
     # -- for subclasses -------------------------------------------------
     @abstractmethod
@@ -50,6 +62,20 @@ class BaseSubTask(ABC):
     def report_usage(self, tokens_in: int, tokens_out: int) -> None:
         """Call inside _run when the backend reports exact token usage."""
         self._usage = {"tokens_in": int(tokens_in), "tokens_out": int(tokens_out)}
+
+    def report_signals(self, **kwargs: Any) -> None:
+        """Call inside _run to attach model-quality signals to the row.
+
+        Latency and cost say how *cheap* an answer was; these say
+        whether it was any *good* - retrieval similarity, classifier
+        confidence, ASR real-time factor, TTS degradation. They are
+        written to the metrics `extra` JSON blob and aggregated by
+        MetricsLogger.signal_summary().
+
+        None values are dropped so an unavailable signal is absent
+        rather than recorded as a misleading zero.
+        """
+        self._signals.update({k: v for k, v in kwargs.items() if v is not None})
 
     # -- public API (assignment schema) ----------------------------------
     def run(self, payload: Any) -> dict[str, Any]:
@@ -61,6 +87,7 @@ class BaseSubTask(ABC):
         instead of crashing mid-demo.
         """
         self._usage = None
+        self._signals = {}
 
         # 1) cache lookup (text-payload tasks only)
         if self.cache is not None and self.cacheable:
@@ -89,6 +116,8 @@ class BaseSubTask(ABC):
                     rec.set_tokens(**self._usage)
                 else:
                     rec.estimate_tokens(str(payload), str(output))
+                if self._signals:
+                    rec.add_extra(**self._signals)
         except Exception as exc:  # noqa: BLE001 - demo must not crash
             error_text = f"{type(exc).__name__}: {exc}"
 
@@ -109,6 +138,7 @@ class BaseSubTask(ABC):
                 "cache_hit": False,
                 "status": "ok" if error_text is None else "error",
                 **({"error": error_text} if error_text else {}),
+                **self._signals,
                 **(
                     self._usage
                     or {

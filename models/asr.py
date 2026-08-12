@@ -5,17 +5,17 @@ An engineer/user records the incident by voice (Streamlit mic input or
 an uploaded audio file); Whisper transcribes it into the incident text
 that feeds the rest of the pipeline.
 
-Model: openai/whisper-tiny (39M params). Chosen for: fully local,
-CPU real-time transcription, robust to accents; whisper-small is a
-one-line upgrade on GPU machines.
+Model: openai/whisper-large. Chosen for stronger transcription quality on GPU machines; whisper-tiny is still available for low-resource local CPU use.
 """
 from __future__ import annotations
+
+import time as _time
 
 from typing import Any
 
 import numpy as np
 
-from models.base import BaseSubTask
+from models.base import BaseSubTask, resolve_device
 from src import config
 
 TARGET_SR = 16_000  # Whisper's expected sampling rate
@@ -47,10 +47,20 @@ class ASRTask(BaseSubTask):
         if self._pipe is None:
             from transformers import pipeline  # lazy heavy import
 
+            device = resolve_device()
+            pipeline_device: int | str
+            if device == "cuda":
+                pipeline_device = 0
+            elif device == "mps":
+                pipeline_device = "mps"
+            else:
+                pipeline_device = -1
+
             self._pipe = pipeline(
                 "automatic-speech-recognition",
                 model=self.model_name,
                 chunk_length_s=30,
+                device=pipeline_device,
             )
 
     def _run(self, payload: Any) -> str:
@@ -66,8 +76,23 @@ class ASRTask(BaseSubTask):
             audio = to_mono_16k(data, sr)
         if audio.size < TARGET_SR // 4:  # < 0.25 s
             raise ValueError("audio too short to transcribe")
+        audio_s = audio.size / TARGET_SR
+        t0 = _time.perf_counter()
         result = self._pipe(
             {"array": audio, "sampling_rate": TARGET_SR},
             generate_kwargs={"language": "english", "task": "transcribe"},
         )
-        return str(result["text"]).strip()
+        decode_s = _time.perf_counter() - t0
+        transcript = str(result["text"]).strip()
+        # Real-time factor is the standard ASR efficiency metric:
+        # decode time divided by audio duration. RTF < 1 means faster
+        # than real time. whisper-large on CPU sits far above 1, which
+        # is a deliberate accuracy-for-speed trade we report rather
+        # than hide.
+        self.report_signals(
+            asr_audio_s=round(audio_s, 3),
+            asr_decode_s=round(decode_s, 3),
+            asr_rtf=round(decode_s / audio_s, 3) if audio_s > 0 else None,
+            asr_chars=len(transcript),
+        )
+        return transcript

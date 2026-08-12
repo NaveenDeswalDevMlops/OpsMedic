@@ -1,5 +1,5 @@
 # models/summarizer.py
-"""Sub-task 3 (NLP): ticket / resolution summarization.
+"""Sub-task 4 (NLP): ticket / resolution summarization.
 
 Condenses a long ticket thread or generated resolution into a 2-3
 sentence handover summary (for shift notes and the TTS read-out).
@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from models.base import BaseSubTask
+from models.base import BaseSubTask, resolve_device
 from src import config
 
 MAX_INPUT_CHARS = 3500  # ~ model's 1024-token limit with margin
@@ -31,7 +31,15 @@ class SummarizerTask(BaseSubTask):
         if self._pipe is None:
             from transformers import pipeline  # lazy heavy import
 
-            self._pipe = pipeline("summarization", model=self.model_name)
+            device = resolve_device()
+            pipeline_device: int | str
+            if device == "cuda":
+                pipeline_device = 0
+            elif device == "mps":
+                pipeline_device = "mps"
+            else:
+                pipeline_device = -1
+            self._pipe = pipeline("summarization", model=self.model_name, device=pipeline_device)
 
     def _run(self, payload: Any) -> str:
         text = str(payload).strip()
@@ -45,4 +53,15 @@ class SummarizerTask(BaseSubTask):
             do_sample=False,
             truncation=True,
         )
-        return result[0]["summary_text"].strip()
+        summary = result[0]["summary_text"].strip()
+        # Compression ratio is the point of this sub-task: a shift
+        # handover note that is 90% of the original length has failed
+        # even if it reads well.
+        self.report_signals(
+            compression_ratio=(
+                round(len(summary) / len(text), 4) if text else None
+            ),
+            input_chars=len(text),
+            summary_chars=len(summary),
+        )
+        return summary

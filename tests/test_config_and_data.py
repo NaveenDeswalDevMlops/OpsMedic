@@ -33,7 +33,7 @@ def test_fill_is_consistent_across_fields():
 def test_config_imports_without_dotenv_or_env_file():
     # Import already happened at module load; verify key defaults exist.
     assert config.PRODUCT_NAME  # non-empty
-    assert config.ASR_MODEL == os.getenv("ASR_MODEL", "openai/whisper-tiny")
+    assert config.ASR_MODEL == os.getenv("ASR_MODEL", "openai/whisper-large")
     assert isinstance(config.TOP_K, int) and config.TOP_K > 0
     assert 0.0 <= config.SIMILARITY_THRESHOLD <= 1.0
     assert "llama-3.1-8b-instant" in config.PRICE_PER_MTOK

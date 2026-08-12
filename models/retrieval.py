@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from models.base import BaseSubTask
+from models.base import BaseSubTask, resolve_device
 from src import config
 
 SNIPPET_CHARS = 300  # description preview length in results
@@ -80,7 +80,7 @@ class RetrievalTask(BaseSubTask):
             )
         self._index = faiss.read_index(index_path)
         self._meta_rows = pd.read_csv(meta_path).to_dict(orient="records")
-        self._encoder = SentenceTransformer(self.model_name)
+        self._encoder = SentenceTransformer(self.model_name, device=resolve_device())
 
     # -- execution --------------------------------------------------------
     def _run(self, payload: Any) -> list[dict[str, Any]]:
@@ -93,9 +93,23 @@ class RetrievalTask(BaseSubTask):
             [query], normalize_embeddings=True, convert_to_numpy=True
         ).astype("float32")
         scores, idxs = self._index.search(vec, config.TOP_K)
-        return filter_hits(
+        hits = filter_hits(
             scores[0].tolist(),
             idxs[0].tolist(),
             self._meta_rows,
             config.SIMILARITY_THRESHOLD,
         )
+        # Retrieval confidence: how strong was the best match, and did
+        # anything clear the threshold at all? A high no_evidence rate
+        # means the generator is being asked to answer ungrounded.
+        kept = [h["score"] for h in hits]
+        self.report_signals(
+            retrieval_top_score=round(max(kept), 4) if kept else 0.0,
+            retrieval_mean_score=(
+                round(sum(kept) / len(kept), 4) if kept else 0.0
+            ),
+            evidence_count=len(hits),
+            no_evidence=not kept,
+            similarity_threshold=config.SIMILARITY_THRESHOLD,
+        )
+        return hits

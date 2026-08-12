@@ -343,7 +343,7 @@ def _transcribe(
     st.session_state[K_DRAFT] = result["output"]
     latency = asr_latency_ms()
     st.session_state[K_ASR_NOTE] = (
-        f"Transcribed by whisper-tiny"
+        f"Transcribed by Whisper Large"
         + (f" in {latency:.0f} ms" if latency else "")
         + " — edit the text and press send."
     )

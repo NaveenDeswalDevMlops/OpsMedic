@@ -98,6 +98,10 @@ class _Record:
     tokens_out: int = 0
     cache_hit: bool = False
     extra: dict[str, Any] = field(default_factory=dict)
+    # Set only by streamed callers via set_latency_ms() / mark_error().
+    latency_override: float | None = None
+    status_override: str | None = None
+    error_override: str | None = None
 
     def set_tokens(self, tokens_in: int = 0, tokens_out: int = 0) -> None:
         self.tokens_in = int(tokens_in)
@@ -113,6 +117,26 @@ class _Record:
 
     def add_extra(self, **kwargs: Any) -> None:
         self.extra.update(kwargs)
+
+    def set_latency_ms(self, latency_ms: float) -> None:
+        """Override the measured wall-clock time for this row.
+
+        Required for streamed calls: the generator is fully drained
+        before `track()` is entered, so the context manager would
+        otherwise time an empty block and record ~0 ms. The caller
+        starts its own timer at first byte and passes real elapsed here.
+        """
+        self.latency_override = max(0.0, float(latency_ms))
+
+    def mark_error(self, error_text: str) -> None:
+        """Record a failure the caller caught instead of raising.
+
+        A streamed call swallows its exception so partial output can
+        still be shown. Without this the row is written status='ok' and
+        the error-rate metric under-reports every streaming failure.
+        """
+        self.status_override = "error"
+        self.error_override = str(error_text)
 
 
 class MetricsLogger:
@@ -163,6 +187,11 @@ class MetricsLogger:
             raise
         finally:
             latency_ms = (time.perf_counter() - start) * 1000.0
+            if rec.latency_override is not None:
+                latency_ms = rec.latency_override
+            if rec.status_override is not None and status == "ok":
+                status = rec.status_override
+                error_text = rec.error_override
             self._write(rec, latency_ms, status, error_text)
 
     def _write(
@@ -213,6 +242,7 @@ class MetricsLogger:
         if not rows:
             return {
                 "requests": 0, "latency_p50_ms": 0.0, "latency_p95_ms": 0.0,
+                "latency_p99_ms": 0.0,
                 "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0,
                 "error_rate": 0.0, "cache_hit_rate": 0.0,
                 "throughput_rpm": 0.0,
@@ -226,6 +256,7 @@ class MetricsLogger:
             "requests": len(rows),
             "latency_p50_ms": round(percentile(latencies, 50), 2),
             "latency_p95_ms": round(percentile(latencies, 95), 2),
+            "latency_p99_ms": round(percentile(latencies, 99), 2),
             "tokens_in": sum(r["tokens_in"] for r in rows),
             "tokens_out": sum(r["tokens_out"] for r in rows),
             "cost_usd": round(sum(r["cost_usd"] for r in rows), 6),
@@ -261,3 +292,153 @@ class MetricsLogger:
                 "cache_hit_rate": round(hits / len(grp), 4),
             })
         return out
+
+    # -- read path (Golden Signals tab) ---------------------------------
+    #: fields the sub-tasks report via BaseSubTask.report_signals() and
+    #: which this module knows how to aggregate. Each entry is
+    #: (extra_key, aggregation) where aggregation is "mean" | "rate".
+    SIGNAL_FIELDS: tuple[tuple[str, str], ...] = (
+        ("retrieval_top_score", "mean"),
+        ("retrieval_mean_score", "mean"),
+        ("evidence_count", "mean"),
+        ("no_evidence", "rate"),
+        ("classifier_confidence", "mean"),
+        ("low_confidence", "rate"),
+        ("asr_audio_s", "mean"),
+        ("asr_rtf", "mean"),
+        ("tts_fallback", "rate"),
+        ("compression_ratio", "mean"),
+        ("ttft_ms", "mean"),
+        ("tokens_per_sec", "mean"),
+    )
+
+    def _rows_in_window(
+        self, window_seconds: float | None = None
+    ) -> list[dict[str, Any]]:
+        where, params = "", []
+        if window_seconds:
+            where = "WHERE ts >= ?"
+            params = [time.time() - window_seconds]
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"SELECT ts, subtask, model, latency_ms, tokens_in, tokens_out,"
+                f" cost_usd, status, cache_hit, extra FROM metrics {where}"
+                f" ORDER BY ts",
+                params,
+            ).fetchall()
+        out: list[dict[str, Any]] = []
+        for r in rows:
+            d = dict(r)
+            try:
+                d["extra_parsed"] = json.loads(d["extra"]) if d["extra"] else {}
+            except (ValueError, TypeError):
+                d["extra_parsed"] = {}
+            out.append(d)
+        return out
+
+    def timeseries(
+        self,
+        bucket_seconds: float = 60.0,
+        window_seconds: float | None = 3600.0,
+    ) -> list[dict[str, Any]]:
+        """Bucketed traffic + latency, one dict per (bucket, subtask).
+
+        Feeds the stacked-area traffic chart and the sub-task x time
+        latency heatmap. Buckets are aligned to the epoch so repeated
+        calls return stable x-axis values.
+        """
+        rows = self._rows_in_window(window_seconds)
+        if not rows:
+            return []
+        buckets: dict[tuple[float, str], list[dict[str, Any]]] = {}
+        for r in rows:
+            b = math.floor(r["ts"] / bucket_seconds) * bucket_seconds
+            buckets.setdefault((b, r["subtask"]), []).append(r)
+        out: list[dict[str, Any]] = []
+        for (bucket, subtask), grp in sorted(buckets.items()):
+            lat = [g["latency_ms"] for g in grp]
+            errs = sum(1 for g in grp if g["status"] != "ok")
+            out.append({
+                "bucket_ts": bucket,
+                "subtask": subtask,
+                "requests": len(grp),
+                "errors": errs,
+                "error_rate": round(errs / len(grp), 4),
+                "latency_p50_ms": round(percentile(lat, 50), 2),
+                "latency_p95_ms": round(percentile(lat, 95), 2),
+                "cost_usd": round(sum(g["cost_usd"] for g in grp), 6),
+                "cache_hits": sum(g["cache_hit"] for g in grp),
+            })
+        return out
+
+    def signal_summary(
+        self, window_seconds: float | None = None
+    ) -> list[dict[str, Any]]:
+        """Aggregate the model-quality signals stored in `extra`.
+
+        These are the metrics that say whether the *output* was any
+        good, as opposed to how fast it arrived: retrieval confidence,
+        classifier confidence, ASR real-time factor, TTS degradation.
+        Returns one row per signal that actually has data, so a signal
+        nobody reported never shows up as a misleading zero.
+        """
+        rows = self._rows_in_window(window_seconds)
+        out: list[dict[str, Any]] = []
+        for key, how in self.SIGNAL_FIELDS:
+            vals = [
+                r["extra_parsed"][key]
+                for r in rows
+                if isinstance(r["extra_parsed"], dict)
+                and r["extra_parsed"].get(key) is not None
+            ]
+            if not vals:
+                continue
+            subtasks = sorted({
+                r["subtask"] for r in rows
+                if isinstance(r["extra_parsed"], dict)
+                and r["extra_parsed"].get(key) is not None
+            })
+            if how == "rate":
+                value = sum(1 for v in vals if v) / len(vals)
+            else:
+                nums = [float(v) for v in vals if isinstance(v, (int, float))]
+                value = sum(nums) / len(nums) if nums else 0.0
+            out.append({
+                "signal": key,
+                "aggregation": how,
+                "value": round(value, 4),
+                "n": len(vals),
+                "subtasks": ", ".join(subtasks),
+            })
+        return out
+
+    def error_budget(
+        self, slo: float = 0.99, window_seconds: float | None = None
+    ) -> dict[str, Any]:
+        """SLO attainment and error-budget burn for the gauge.
+
+        With a 99% success objective, 1% of requests may fail before the
+        budget is exhausted. `burn_pct` is the fraction of that
+        allowance already consumed; above 100 the SLO is breached.
+        """
+        rows = self._rows_in_window(window_seconds)
+        total = len(rows)
+        if total == 0:
+            return {
+                "requests": 0, "failures": 0, "success_rate": 1.0,
+                "slo": slo, "budget_pct": 0.0, "burn_pct": 0.0,
+                "breached": False,
+            }
+        failures = sum(1 for r in rows if r["status"] != "ok")
+        success_rate = (total - failures) / total
+        allowed = 1.0 - slo
+        burn = (failures / total) / allowed if allowed > 0 else 0.0
+        return {
+            "requests": total,
+            "failures": failures,
+            "success_rate": round(success_rate, 4),
+            "slo": slo,
+            "budget_pct": round(allowed * 100, 2),
+            "burn_pct": round(burn * 100, 2),
+            "breached": success_rate < slo,
+        }

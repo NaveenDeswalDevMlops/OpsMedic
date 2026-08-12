@@ -1,19 +1,26 @@
 # models/classifier.py
-"""Sub-task 4 (NLP): ticket queue classification - the fine-tuned sub-task.
+"""Sub-task 2 (NLP): ticket queue classification - the fine-tuned sub-task.
 
 Predicts which queue/category a new incident belongs to. Two variants,
 switchable at construction (and via a UI toggle in the app):
 
-  variant="base"       distilbert-base-uncased with a randomly
-                       initialized 10-class head -> near-random accuracy.
-                       This is the honest "before" baseline.
+  variant="base"       CLASSIFIER_BASE_MODEL (microsoft/deberta-v3-base)
+                       with a randomly initialized 10-class head. Note
+                       this is a chance-level floor, not a tuned
+                       competitor: the head is re-randomised on every
+                       construction, so its score moves between runs.
+                       Compare against the majority-class baseline
+                       (0.289 on our test split) for a stable reference.
   variant="finetuned"  the same architecture after finetune/train.py has
                        trained it on the dataset's train split -> the
                        "after". Loaded from CLASSIFIER_FINETUNED_DIR.
   variant="auto"       finetuned if the artifact exists, else base.
 
-Model: DistilBERT (66M params). Chosen for: minutes-scale CPU
-fine-tuning, strong text-classification accuracy for its size, free.
+Model: DeBERTa-v3-base (184M params), read from config so the choice is
+never hard-coded here. Chosen for: disentangled attention and
+ELECTRA-style pre-training give it a clear edge over BERT/DistilBERT at
+the same depth on short, jargon-dense ticket text, while still being
+small enough to fine-tune in a free GPU session.
 """
 from __future__ import annotations
 
@@ -21,7 +28,7 @@ import json
 import os
 from typing import Any
 
-from models.base import BaseSubTask
+from models.base import BaseSubTask, resolve_device
 from src import config
 
 # Fallback label set (the dataset's top-10 queues) used only when neither
@@ -33,6 +40,13 @@ DEFAULT_LABELS = [
     "Service Outages and Maintenance", "Technical Support",
 ]
 MAX_INPUT_CHARS = 2000
+
+#: Softmax confidence below which a queue prediction is treated as
+#: "needs human triage" rather than acted on automatically. Chance for
+#: this 10-class problem is 0.10 and the fine-tuned model scores 0.357
+#: accuracy on held-out data, so anything under half is a coin flip
+#: dressed up as an answer. Tune with OPSMEDIC_LOW_CONF if needed.
+LOW_CONFIDENCE_FLOOR = float(os.getenv("OPSMEDIC_LOW_CONF", "0.50"))
 
 
 def resolve_labels() -> list[str]:
@@ -112,6 +126,7 @@ class ClassifierTask(BaseSubTask):
             pipeline,
         )
 
+        device = resolve_device()
         id2label = {i: lab for i, lab in enumerate(self.labels)}
         label2id = {lab: i for i, lab in enumerate(self.labels)}
         model = AutoModelForSequenceClassification.from_pretrained(
@@ -119,14 +134,21 @@ class ClassifierTask(BaseSubTask):
             num_labels=len(self.labels),
             id2label=id2label,
             label2id=label2id,
-        )
+        ).to(device)
         tokenizer = AutoTokenizer.from_pretrained(
             config.CLASSIFIER_BASE_MODEL
             if self.variant == "base"
             else self._model_path
         )
+        pipeline_device: int | str
+        if device == "cuda":
+            pipeline_device = 0
+        elif device == "mps":
+            pipeline_device = "mps"
+        else:
+            pipeline_device = -1
         self._pipe = pipeline(
-            "text-classification", model=model, tokenizer=tokenizer
+            "text-classification", model=model, tokenizer=tokenizer, device=pipeline_device
         )
 
     def _run(self, payload: Any) -> dict[str, Any]:
@@ -135,8 +157,18 @@ class ClassifierTask(BaseSubTask):
             raise ValueError("empty text")
         self._ensure_loaded()
         pred = self._pipe(text[:MAX_INPUT_CHARS], truncation=True)[0]
+        confidence = round(float(pred["score"]), 4)
+        # Confidence drives the escalate-to-human path: a low-confidence
+        # queue guess is worse than no guess, because it routes the
+        # ticket to the wrong team and restarts the clock.
+        self.report_signals(
+            classifier_confidence=confidence,
+            low_confidence=confidence < LOW_CONFIDENCE_FLOOR,
+            predicted_label=pred["label"],
+            classifier_variant=self.variant,
+        )
         return {
             "label": pred["label"],
-            "confidence": round(float(pred["score"]), 4),
+            "confidence": confidence,
             "variant": self.variant,
         }

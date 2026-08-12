@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 import time
@@ -24,6 +25,12 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from finetune.data import build_label_maps, default_paths, load_split  # noqa: E402
+from finetune.device import (
+    NonFiniteLoss,
+    check_log_row,
+    resolve_precision,
+    resolve_training_device,
+)  # noqa: E402
 from src import config  # noqa: E402
 
 
@@ -50,10 +57,39 @@ def main() -> None:
     parser.add_argument("--epochs", type=int, default=config.FINETUNE_EPOCHS)
     parser.add_argument("--batch", type=int, default=16)
     parser.add_argument("--lr", type=float, default=5e-5)
+    parser.add_argument("--weight-decay", type=float, default=0.01)
+    parser.add_argument("--warmup-ratio", type=float, default=0.1,
+                        help="fraction of total training steps used for warmup")
+    parser.add_argument("--max-grad-norm", type=float, default=1.0)
+    parser.add_argument("--grad-accum", type=int, default=1,
+                        help="gradient accumulation steps for an effective larger batch")
     parser.add_argument("--seed", type=int, default=config.FINETUNE_SEED)
     parser.add_argument("--balanced", action="store_true",
                         help="median-downsample classes to fight majority bias")
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cuda", "mps", "cpu"],
+        default="auto",
+        help="select the training device explicitly",
+    )
+    parser.add_argument(
+        "--force-mps",
+        action="store_true",
+        help="override the MPS safety policy for known-unsafe architectures",
+    )
     args = parser.parse_args()
+
+    device, device_notes = resolve_training_device(
+        config.CLASSIFIER_BASE_MODEL,
+        requested=args.device,
+        force_mps=args.force_mps,
+    )
+    for note in device_notes:
+        print(f"[policy] {note}")
+
+    fp16, bf16, precision_notes = resolve_precision(config.CLASSIFIER_BASE_MODEL, device)
+    for note in precision_notes:
+        print(f"[policy] {note}")
 
     paths = default_paths()
 
@@ -78,6 +114,7 @@ def main() -> None:
         AutoTokenizer,
         Trainer,
         TrainingArguments,
+        TrainerCallback,
         set_seed,
     )
 
@@ -88,7 +125,8 @@ def main() -> None:
         num_labels=len(labels),
         id2label=id2label,
         label2id=label2id,
-    )
+    ).to(device)
+    print(f"[policy] selected device={device}")
 
     class TicketDataset(torch.utils.data.Dataset):
         def __init__(self, texts: list[str], label_ids: list[int]) -> None:
@@ -108,24 +146,44 @@ def main() -> None:
     train_ds = TicketDataset(train_texts, train_ids)
     eval_ds = TicketDataset(test_texts, test_ids)
 
+    num_update_steps_per_epoch = math.ceil(
+        len(train_ds) / (args.batch * args.grad_accum)
+    )
+    warmup_steps = max(1, int(args.warmup_ratio * num_update_steps_per_epoch * args.epochs))
+
     training_args = TrainingArguments(
         output_dir=os.path.join(paths["artifact_dir"], "checkpoints"),
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch,
+        gradient_accumulation_steps=args.grad_accum,
         per_device_eval_batch_size=32,
         learning_rate=args.lr,
+        weight_decay=args.weight_decay,
+        warmup_steps=warmup_steps,
+        max_grad_norm=args.max_grad_norm,
+        fp16=fp16,
+        bf16=bf16,
+        dataloader_pin_memory=(device == "cuda"),
         eval_strategy="epoch",
         logging_steps=25,
         save_strategy="no",  # we save the final model ourselves
         seed=args.seed,
         report_to=[],  # no wandb/tensorboard
     )
+
+    class _AbortOnNaN(TrainerCallback):
+        def on_log(self, args, state, control, logs=None, **kwargs):
+            if logs is None:
+                return
+            check_log_row(logs)
+
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_ds,
         eval_dataset=eval_ds,
         compute_metrics=compute_metrics_factory(),
+        callbacks=[_AbortOnNaN()],
     )
 
     # ---- train --------------------------------------------------------
@@ -152,6 +210,7 @@ def main() -> None:
                     "epochs": args.epochs,
                     "batch_size": args.batch,
                     "learning_rate": args.lr,
+                    "device": device,
                     "max_length": 256,
                     "seed": args.seed,
                 },

@@ -48,14 +48,23 @@ EMBEDDING_MODEL: str = os.getenv(
 )
 SUMMARIZER_MODEL: str = os.getenv("SUMMARIZER_MODEL", "sshleifer/distilbart-cnn-12-6")
 CLASSIFIER_BASE_MODEL: str = os.getenv(
-    "CLASSIFIER_BASE_MODEL", "distilbert-base-uncased"
+    "CLASSIFIER_BASE_MODEL", "microsoft/deberta-v3-base"
 )
 CLASSIFIER_FINETUNED_DIR: str = os.getenv(
-    "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/distilbert-tickets"
+    "CLASSIFIER_FINETUNED_DIR", "./finetune/artifacts/deberta-v3-base-tickets"
 )
 # Speech Recognition category
-ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-tiny")
+ASR_MODEL: str = os.getenv("ASR_MODEL", "openai/whisper-large")
+# espnet/kan-bayashi_ljspeech_vits is an ESPnet artifact, NOT a Hugging Face
+# VitsModel checkpoint, so VitsModel.from_pretrained cannot load it: it failed
+# 7 of 15 logged calls, and the other 8 were the silent macOS `say` fallback
+# rather than real VITS synthesis. mms-tts-eng loads correctly (9/9 logged).
+# hexgrad/Kokoro-82M is better quality but needs `pip install kokoro` plus the
+# espeak-ng system binary, so it stays an opt-in documented in env2.example.
 TTS_MODEL: str = os.getenv("TTS_MODEL", "facebook/mms-tts-eng")
+KOKORO_VOICE: str = os.getenv("KOKORO_VOICE", "bf_emma")
+KOKORO_LANG: str = os.getenv("KOKORO_LANG", "b")
+KOKORO_SPEED: float = float(os.getenv("KOKORO_SPEED", "1.0"))
 
 # --- Data: Customer IT Support ticket dataset (with resolutions) ----
 # Citation: T. Bueck, "Customer Support Tickets", Hugging Face.

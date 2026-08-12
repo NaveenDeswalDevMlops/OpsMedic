@@ -1,0 +1,45 @@
+# requirements.txt
+# OpsMedic — GenAI Incident Copilot (BITS CCZG506 Assignment II)
+# Pinned versions, CPU-only friendly. Install:
+#   pip install -r requirements.txt
+# On Windows without a GPU, torch installs the CPU wheel automatically.
+
+# --- UI ---
+streamlit  # >=1.39 required for st.audio_input (mic widget)
+
+# --- NLP / Speech models (Hugging Face, all free) ---
+transformers
+torch
+# NOTE: torchvision is required by some Transformers image-processing
+# modules that Streamlit may inspect during startup.
+# Use the matching build for the installed torch version.
+torchvision==0.19.1
+sentence-transformers
+faiss-cpu
+datasets
+accelerate
+
+# --- Audio I/O for ASR (Whisper) and TTS playback ---
+soundfile
+librosa
+
+# --- Data / classic ML (fine-tune evaluation) ---
+pandas
+numpy
+scikit-learn
+
+# --- LLM API (Groq, OpenAI-compatible REST) + env ---
+requests
+plotly
+pypdf
+psutil
+python-dotenv
+
+# --- Tests ---
+pytest
+# beautifulsoup4 ships soupsieve, the CSS engine used by
+# tests/test_theme_selectors_offline.py to run the composer's :has()
+# selectors against a replica of Streamlit's DOM. Test-only, pure Python;
+# that suite skips itself if this is missing, so the app never needs it.
+beautifulsoup4
+

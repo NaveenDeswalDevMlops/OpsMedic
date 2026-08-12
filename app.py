@@ -118,13 +118,24 @@ def load_chat(cid: str) -> None:
 
 
 # ------------------------------------------------------------- sidebar
+def _new_chat_and_rerun() -> None:
+    """Clicking 'Chat' while already on Chat starts a fresh conversation.
+
+    This replaces the separate '+ New chat' button: navigating to the
+    page you are already on has no other useful meaning, so the nav
+    entry carries the action instead of duplicating it below.
+    """
+    start_new_chat()
+    st.rerun()
+
+
 with st.sidebar:
     nav.render_brand()
-    nav.render_workspace_nav(active_label="💬  Chat")
-
-    if st.button("＋  New chat", use_container_width=True, key="newchat"):
-        start_new_chat()
-        st.rerun()
+    nav.render_workspace_nav(
+        active_label="💬  Chat",
+        on_active_click=_new_chat_and_rerun,
+        active_help="Start a new chat",
+    )
 
     # ---- conversation history (collapsible; day-grouped recents) ----
     with nav.section_header("Recents", expanded=True):

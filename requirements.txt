@@ -43,4 +43,3 @@ pytest==8.3.2
 # selectors against a replica of Streamlit's DOM. Test-only, pure Python;
 # that suite skips itself if this is missing, so the app never needs it.
 beautifulsoup4==4.12.3
-
